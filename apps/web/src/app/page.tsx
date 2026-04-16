@@ -168,6 +168,26 @@ export default function HomePage() {
             <p style={{ color: '#a0a0a0', fontSize: '0.9rem' }}>🕒 Horario de Reservas: Lunes a Viernes de 08:00 a 18:00 hs</p>
           </div>
 
+          <div style={{
+            borderRadius: 16,
+            overflow: 'hidden',
+            border: '2px solid rgba(212, 175, 55, 0.3)',
+            boxShadow: '0 0 40px rgba(212, 175, 55, 0.15)',
+            height: '450px',
+            position: 'relative',
+            background: '#000'
+          }}>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d794.0057338884527!2d-73.3172433!3d-37.2471633!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9669e50058cac1e9%3A0xd543e75982f7204b!2sDiamond%20car%20wash%20arauco!5e0!3m2!1ses!2scl!4v1775102004064!5m2!1ses!2scl"
+              width="100%"
+              height="100%"
+              style={{ border: 0, filter: 'grayscale(1) invert(0.9) contrast(1.2)' }}
+              allowFullScreen={true}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+
           {/* Google Reviews Integration */}
           <div style={{ marginBottom: 60 }}>
             <div style={{ textAlign: 'center', marginBottom: 30 }}>
@@ -176,10 +196,10 @@ export default function HomePage() {
               </div>
               <h3 style={{ fontSize: '1.5rem', color: '#fff', marginBottom: 8 }}>Nuestros Clientes Dicen</h3>
             </div>
-            
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
               gap: 20
             }}>
               {[
@@ -203,38 +223,17 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-            
+
             <div style={{ textAlign: 'center', marginTop: 24 }}>
-              <a 
-                href="https://maps.app.goo.gl/ixZdCtEpLPdE51DV8" 
-                target="_blank" 
+              <a
+                href="https://maps.app.goo.gl/ixZdCtEpLPdE51DV8"
+                target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: '#d4af37', fontSize: '0.85rem', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }}
               >
                 Ver más reseñas en Google Maps <span>→</span>
               </a>
             </div>
-          </div>
-          
-          
-          <div style={{ 
-            borderRadius: 16, 
-            overflow: 'hidden', 
-            border: '2px solid rgba(212, 175, 55, 0.3)',
-            boxShadow: '0 0 40px rgba(212, 175, 55, 0.15)',
-            height: '450px',
-            position: 'relative',
-            background: '#000'
-          }}>
-            <iframe 
-              src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d794.0057338884527!2d-73.3172433!3d-37.2471633!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9669e50058cac1e9%3A0xd543e75982f7204b!2sDiamond%20car%20wash%20arauco!5e0!3m2!1ses!2scl!4v1775102004064!5m2!1ses!2scl"
-              width="100%" 
-              height="100%" 
-              style={{ border: 0, filter: 'grayscale(1) invert(0.9) contrast(1.2)' }} 
-              allowFullScreen={true} 
-              loading="lazy" 
-              referrerPolicy="no-referrer-when-downgrade"
-            ></iframe>
           </div>
         </div>
       </section>
@@ -253,9 +252,9 @@ export default function HomePage() {
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '24px' }}>
           {(settings?.instagram_url || 'https://www.instagram.com/diamondcarwash.arauco/') && (
-            <a 
-              href={settings?.instagram_url || 'https://www.instagram.com/diamondcarwash.arauco/'} 
-              target="_blank" 
+            <a
+              href={settings?.instagram_url || 'https://www.instagram.com/diamondcarwash.arauco/'}
+              target="_blank"
               rel="noopener noreferrer"
               style={{ color: '#a0a0a0', transition: 'color 0.3s' }}
               onMouseEnter={(e) => (e.currentTarget.style.color = '#d4af37')}
@@ -269,9 +268,9 @@ export default function HomePage() {
             </a>
           )}
           {(settings?.facebook_url || 'https://www.facebook.com/people/DiamondcarwuashArauco/100064216656842/') && (
-            <a 
-              href={settings?.facebook_url || 'https://www.facebook.com/people/DiamondcarwuashArauco/100064216656842/'} 
-              target="_blank" 
+            <a
+              href={settings?.facebook_url || 'https://www.facebook.com/people/DiamondcarwuashArauco/100064216656842/'}
+              target="_blank"
               rel="noopener noreferrer"
               style={{ color: '#a0a0a0', transition: 'color 0.3s' }}
               onMouseEnter={(e) => (e.currentTarget.style.color = '#d4af37')}
