@@ -167,6 +167,55 @@ export default function HomePage() {
             <p style={{ color: '#d4af37', fontSize: '1.1rem', letterSpacing: '0.05em', fontWeight: 500, marginBottom: 8 }}>Esmeralda 439, Arauco</p>
             <p style={{ color: '#a0a0a0', fontSize: '0.9rem' }}>🕒 Horario de Reservas: Lunes a Viernes de 08:00 a 18:00 hs</p>
           </div>
+
+          {/* Google Reviews Integration */}
+          <div style={{ marginBottom: 60 }}>
+            <div style={{ textAlign: 'center', marginBottom: 30 }}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginBottom: 12 }}>
+                {[1, 2, 3, 4, 5].map(i => <span key={i} style={{ color: '#d4af37', fontSize: '1.2rem' }}>★</span>)}
+              </div>
+              <h3 style={{ fontSize: '1.5rem', color: '#fff', marginBottom: 8 }}>Nuestros Clientes Dicen</h3>
+            </div>
+            
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+              gap: 20
+            }}>
+              {[
+                { name: 'Cesar Antonio', text: 'Excelente servicio muy recomendable me gustó como quedó mi nave jajaj como nueva...' },
+                { name: 'Benique Clinton', text: 'Muy buen servicio recomendado' },
+                { name: 'Daniela Rojas', text: 'Excelente servicio!' }
+              ].map((review, i) => (
+                <div key={i} className="card" style={{ padding: 20, border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)' }}>
+                  <div style={{ display: 'flex', gap: 2, marginBottom: 8 }}>
+                    {[1, 2, 3, 4, 5].map(j => <span key={j} style={{ color: '#d4af37', fontSize: '0.7rem' }}>★</span>)}
+                  </div>
+                  <p style={{ color: '#ccc', fontSize: '0.85rem', fontStyle: 'italic', marginBottom: 16 }}>
+                    "{review.text}"
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#d4af37', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 'bold', fontSize: '0.7rem' }}>
+                      {review.name.charAt(0)}
+                    </div>
+                    <span style={{ color: '#fff', fontSize: '0.8rem', fontWeight: 600 }}>{review.name}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div style={{ textAlign: 'center', marginTop: 24 }}>
+              <a 
+                href="https://maps.app.goo.gl/ixZdCtEpLPdE51DV8" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ color: '#d4af37', fontSize: '0.85rem', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+              >
+                Ver más reseñas en Google Maps <span>→</span>
+              </a>
+            </div>
+          </div>
+          
           
           <div style={{ 
             borderRadius: 16, 
