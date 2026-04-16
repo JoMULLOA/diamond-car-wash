@@ -37,7 +37,7 @@ function getOrCreateClient(): Client {
   return newClient;
 }
 
-let client: Client = getOrCreateClient();
+let client: Client | null = getOrCreateClient();
 let initialized = false;
 
 // SQL Schema - inline
