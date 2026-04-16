@@ -9,13 +9,35 @@ dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Singleton pattern for Next.js HMR stability
+declare global {
+  var _libsqlClient: Client | undefined;
+}
+
 // Database file path - fallback for local if NO turso URL is provided 
 const localDbPath = path.join(__dirname, '../../data/diamond.sqlite');
+
 const dbUrl = process.env.DATABASE_URL || `file:${localDbPath}`;
 const dbToken = process.env.DATABASE_AUTH_TOKEN;
 
-// Singleton
-let client: Client | null = null;
+function getOrCreateClient(): Client {
+  if (globalThis._libsqlClient) {
+    return globalThis._libsqlClient;
+  }
+  
+  const newClient = createClient({
+    url: dbUrl,
+    authToken: dbToken,
+  });
+  
+  if (process.env.NODE_ENV !== 'production') {
+    globalThis._libsqlClient = newClient;
+  }
+  
+  return newClient;
+}
+
+let client: Client = getOrCreateClient();
 let initialized = false;
 
 // SQL Schema - inline
@@ -180,54 +202,49 @@ CREATE TABLE IF NOT EXISTS membership_services (
 export async function initDatabase(): Promise<void> {
   if (initialized) return;
 
-  if (dbUrl.startsWith('file:')) {
-    const dbDir = path.dirname(localDbPath);
-    if (!fs.existsSync(dbDir)) {
-      fs.mkdirSync(dbDir, { recursive: true });
-    }
-  }
-
-  client = createClient({
-    url: dbUrl,
-    authToken: dbToken,
-  });
-
-  console.log(`[DB] Connected to ${dbUrl.startsWith('file:') ? 'local SQLite' : 'Turso'}`);
+  console.log(`[DB] Using connection to ${dbUrl.startsWith('file:') ? 'local SQLite' : 'Turso'}`);
 
   try {
-    // 1. Initial Tables Creation
-    // In libSQL, we should split statements for batch execution if using remote
-    const statements = SCHEMA.split(';')
-      .map(s => s.trim())
-      .filter(s => s.length > 0);
-
-    await client.batch(statements, 'write');
-
-    // 2. Default Settings Seed
-    const settingsCountRes = await client.execute("SELECT COUNT(*) as c FROM settings");
-    const settingsCount = (settingsCountRes.rows[0]?.c as number) || 0;
+    // Check if the database is already initialized by checking for a core table
+    const tables = await client.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='vehicles'");
     
-    if (settingsCount === 0) {
+    if (tables.rows.length === 0) {
+      console.log('[DB] First time initialization: running schema...');
+      // 1. Initial Tables Creation
+      const statements = SCHEMA.split(';')
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+
+      // Execute in smaller chunks if needed, but batch should handle it if first time
+      await client.batch(statements, 'write');
+
+      // 2. Default Settings Seed
       await client.batch([
-        "INSERT INTO settings (key, value) VALUES ('rate_per_minute', '5')",
-        "INSERT INTO settings (key, value) VALUES ('business_name', 'Diamond Car Wash')",
-        "INSERT INTO settings (key, value) VALUES ('business_address', '')",
-        "INSERT INTO settings (key, value) VALUES ('booking_open_hour', '08:00')",
-        "INSERT INTO settings (key, value) VALUES ('booking_close_hour', '20:00')",
-        "INSERT INTO settings (key, value) VALUES ('booking_deposit_percent', '20')",
-        "INSERT INTO settings (key, value) VALUES ('booking_slot_interval', '30')",
-        "INSERT INTO settings (key, value) VALUES ('mercado_pago_access_token', '')",
-        "INSERT INTO settings (key, value) VALUES ('whatsapp_number', '56940889752')",
-        "INSERT INTO settings (key, value) VALUES ('instagram_url', 'https://www.instagram.com/diamondcarwash.arauco/')",
-        "INSERT INTO settings (key, value) VALUES ('facebook_url', 'https://www.facebook.com/people/DiamondcarwuashArauco/100064216656842/')"
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('rate_per_minute', '5')",
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('business_name', 'Diamond Car Wash')",
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('business_address', '')",
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('booking_open_hour', '08:00')",
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('booking_close_hour', '20:00')",
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('booking_deposit_percent', '20')",
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('booking_slot_interval', '30')",
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('mercado_pago_access_token', '')",
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('whatsapp_number', '56940889752')",
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('instagram_url', 'https://www.instagram.com/diamondcarwash.arauco/')",
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('facebook_url', 'https://www.facebook.com/people/DiamondcarwuashArauco/100064216656842/')"
       ], 'write');
-      console.log('[DB] Default settings created');
+      console.log('[DB] Schema and default settings created');
+    } else {
+      // console.log('[DB] Connection verified, schema already exists');
     }
 
     initialized = true;
     console.log('[DB] Database ready');
   } catch (err) {
-    console.error('[DB] Error during initialization:', err);
+    if (err instanceof Error && err.message.includes('ECONNRESET')) {
+      console.warn('[DB] Connection reset detected during init, will retry on next request');
+    } else {
+      console.error('[DB] Error during initialization:', err);
+    }
   }
 }
 

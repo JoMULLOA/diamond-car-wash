@@ -39,10 +39,8 @@ let initialized = false;
 
 app.use('*', async (c, next) => {
   if (!initialized) {
-    console.log('[Server] Initializing database...');
     await initDatabase();
     initialized = true;
-    console.log('[Server] Database ready');
   }
   await next();
 });
