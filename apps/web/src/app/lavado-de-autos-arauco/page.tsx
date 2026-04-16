@@ -438,13 +438,13 @@ export default function BookingPage() {
                     {service.media_url ? (
                       service.media_type === 'video' ? (
                         <video
-                          src={`http://localhost:4000${service.media_url}`}
+                          src={service.media_url.startsWith('http') ? service.media_url : `http://localhost:3001${service.media_url}`}
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           muted loop autoPlay playsInline
                         />
                       ) : (
                         <img
-                          src={`http://localhost:4000${service.media_url}`}
+                          src={service.media_url.startsWith('http') ? service.media_url : `http://localhost:3001${service.media_url}`}
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           alt={service.name}
                         />

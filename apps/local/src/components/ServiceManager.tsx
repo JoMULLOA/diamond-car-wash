@@ -61,7 +61,7 @@ export function ServiceManager() {
       process: service.process || '',
       tools_used: service.tools_used || '',
     });
-    setPreviewUrl(service.media_url ? `http://localhost:4000${service.media_url}` : null);
+    setPreviewUrl(service.media_url ? (service.media_url.startsWith('http') ? service.media_url : `http://localhost:3001${service.media_url}`) : null);
     setShowForm(true);
   };
 
@@ -364,9 +364,9 @@ export function ServiceManager() {
                     }`}>
                       {service.media_url ? (
                         service.media_type === 'video' ? (
-                          <video src={`http://localhost:4000${service.media_url}`} className="w-full h-full object-cover" muted loop autoPlay playsInline />
+                          <video src={service.media_url.startsWith('http') ? service.media_url : `http://localhost:3001${service.media_url}`} className="w-full h-full object-cover" muted loop autoPlay playsInline />
                         ) : (
-                          <img src={`http://localhost:4000${service.media_url}`} className="w-full h-full object-cover" alt={service.name} />
+                          <img src={service.media_url.startsWith('http') ? service.media_url : `http://localhost:3001${service.media_url}`} className="w-full h-full object-cover" alt={service.name} />
                         )
                       ) : (
                         <span className="text-lg">🚿</span>
