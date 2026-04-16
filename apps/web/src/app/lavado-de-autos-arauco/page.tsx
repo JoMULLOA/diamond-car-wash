@@ -971,6 +971,68 @@ export default function BookingPage() {
         </>
       )}
 
+      {/* Testimonials / Google Reviews Section */}
+      <section style={{ padding: '60px 20px', background: 'rgba(0,0,0,0.3)', borderTop: '1px solid rgba(212, 175, 55, 0.1)' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <h2 style={{ fontSize: '2rem', fontSerif: 'serif', color: '#fff', marginBottom: 12, trackingWider: '0.1em' }}>
+              EXPERIENCIAS DIAMOND
+            </h2>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginBottom: 16 }}>
+              {[1, 2, 3, 4, 5].map(i => <span key={i} style={{ color: '#d4af37', fontSize: '1.2rem' }}>★</span>)}
+            </div>
+            <p style={{ color: '#888', maxWidth: 600, margin: '0 auto' }}>
+              Lo que nuestros clientes dicen sobre nuestro servicio de detallado premium en Mall Arauco.
+            </p>
+          </div>
+
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+            gap: 24 
+          }}>
+            {[
+              { name: 'Cesar Antonio', text: 'Excelente servicio muy recomendable me gustó como quedó mi nave jajaj como nueva...' },
+              { name: 'Benique Clinton', text: 'Muy buen servicio recomendado' },
+              { name: 'Daniela Rojas', text: 'Excelente servicio!' },
+              { name: 'Nieves Azocar', text: 'Excelente servicio' },
+              { name: 'Carolina Aviles', text: 'Buen servicio' }
+            ].map((review, i) => (
+              <div key={i} className="card" style={{ padding: 24, border: '1px solid rgba(255,255,255,0.05)', position: 'relative' }}>
+                <div style={{ display: 'flex', gap: 2, marginBottom: 12 }}>
+                  {[1, 2, 3, 4, 5].map(j => <span key={j} style={{ color: '#d4af37', fontSize: '0.8rem' }}>★</span>)}
+                </div>
+                <p style={{ color: '#ccc', fontSize: '0.95rem', fontStyle: 'italic', marginBottom: 20, lineHeight: 1.6 }}>
+                  "{review.text}"
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#d4af37', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 'bold', fontSize: '0.8rem' }}>
+                    {review.name.charAt(0)}
+                  </div>
+                  <div>
+                    <span style={{ display: 'block', color: '#fff', fontSize: '0.9rem', fontWeight: 600 }}>{review.name}</span>
+                    <span style={{ color: '#666', fontSize: '0.75rem' }}>Cliente verificado</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: 40 }}>
+            <a 
+              href="https://maps.app.goo.gl/ixZdCtEpLPdE51DV8" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="btn-secondary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}
+            >
+              <span>Ver más en Google Maps</span>
+              <span style={{ fontSize: '1.2rem' }}>📍</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer style={{ padding: '32px 20px', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', marginTop: 40 }}>
         <p style={{ color: '#333', fontSize: '0.75rem', letterSpacing: '0.15em' }}>
