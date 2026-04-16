@@ -1,0 +1,13 @@
+/** @type {import('turbo').TurboConfig} */
+export default {
+  pipeline: {
+    build: {
+      dependsOn: ['^build'],
+      outputs: ['dist/**'],
+    },
+    dev: {
+      cache: false,
+      persistent: true,
+    },
+  },
+};
