@@ -1,9 +1,21 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalPassThroughEnv": [
+    "DATABASE_URL",
+    "DATABASE_AUTH_TOKEN",
+    "BLOB_READ_WRITE_TOKEN",
+    "NEXT_PUBLIC_SITE_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**"]
+      "outputs": ["dist/**", ".next/**"],
+      "env": [
+        "DATABASE_URL",
+        "DATABASE_AUTH_TOKEN",
+        "BLOB_READ_WRITE_TOKEN",
+        "NEXT_PUBLIC_SITE_URL"
+      ]
     },
     "dev": {
       "cache": false,
