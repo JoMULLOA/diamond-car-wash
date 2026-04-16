@@ -202,6 +202,11 @@ CREATE TABLE IF NOT EXISTS membership_services (
 export async function initDatabase(): Promise<void> {
   if (initialized) return;
 
+  // Ensure client is initialized
+  if (!client) {
+    client = getOrCreateClient();
+  }
+
   console.log(`[DB] Using connection to ${dbUrl.startsWith('file:') ? 'local SQLite' : 'Turso'}`);
 
   try {
