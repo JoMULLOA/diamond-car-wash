@@ -975,7 +975,7 @@ export default function BookingPage() {
       <section style={{ padding: '60px 20px', background: 'rgba(0,0,0,0.3)', borderTop: '1px solid rgba(212, 175, 55, 0.1)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <h2 style={{ fontSize: '2rem', fontSerif: 'serif', color: '#fff', marginBottom: 12, trackingWider: '0.1em' }}>
+            <h2 style={{ fontSize: '2rem', fontFamily: 'serif', color: '#fff', marginBottom: 12, letterSpacing: '0.1em' }}>
               EXPERIENCIAS DIAMOND
             </h2>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginBottom: 16 }}>
