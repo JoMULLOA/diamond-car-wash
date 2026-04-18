@@ -85,10 +85,8 @@ export default function BookingPage() {
   const [slots, setSlots] = useState<Slot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [clientData, setClientData] = useState({ name: '', phone: '', patent: '' });
+  const [paymentOption, setPaymentOption] = useState<'20' | '100'>('20');
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
-  const [expandedServiceId, setExpandedServiceId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const totalDuration = cart.reduce((acc, curr) => acc + curr.service.duration_minutes * curr.quantity, 0);
   const totalPrice = cart.reduce((acc, curr) => acc + curr.service.price * curr.quantity, 0);
@@ -184,6 +182,7 @@ export default function BookingPage() {
           client_patent: clientData.patent.toUpperCase().replace(/[\s.-]/g, ''),
           booking_date: selectedDate,
           start_time: selectedSlot.time,
+          payment_option: paymentOption,
         }),
       });
 
@@ -272,7 +271,7 @@ export default function BookingPage() {
 
           <div style={{ background: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: 8, padding: 16, marginBottom: 24 }}>
             <p style={{ color: '#d4af37', fontSize: '0.85rem', fontWeight: 500 }}>
-              💳 Para confirmar tu reserva, realizá el pago de la seña por Mercado Pago.
+              💳 Para confirmar tu reserva, realizá el pago de forma segura.
             </p>
             <button
               className="btn-primary"
@@ -281,11 +280,11 @@ export default function BookingPage() {
                 if (bookingResult.payment_url) {
                   window.location.href = bookingResult.payment_url;
                 } else {
-                  alert('La integración de Mercado Pago no está configurada, pero tu reserva quedó registrada. Te contactaremos por WhatsApp.');
+                  alert('La integración de pago no está configurada, pero tu reserva quedó registrada. Te contactaremos por WhatsApp.');
                 }
               }}
             >
-              Pagar Seña — {formatCurrency(bookingResult.deposit_required)}
+              Pagar Confirmación
             </button>
           </div>
 
@@ -809,25 +808,38 @@ export default function BookingPage() {
                   </div>
                 </div>
 
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                  <div>
-                    <span style={{ color: '#666', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total servicios</span>
-                    <p style={{ color: '#f5f5f5', fontWeight: 700, fontSize: '1.3rem', marginTop: 4 }}>
-                      {formatCurrency(totalPrice)}
-                    </p>
-                  </div>
-                  <div>
-                    <span style={{ color: '#666', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Seña a pagar (20%)</span>
-                    <p style={{ color: '#d4af37', fontWeight: 700, fontSize: '1.3rem', marginTop: 4 }}>
-                      {formatCurrency(Math.round(totalPrice * 0.2))}
-                    </p>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 16 }}>
+                  <p style={{ color: '#666', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>¿Cuánto deseas pagar ahora?</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+                    <div 
+                      onClick={() => setPaymentOption('20')}
+                      style={{
+                        padding: 12, borderRadius: 8, border: `2px solid ${paymentOption === '20' ? '#d4af37' : 'rgba(255,255,255,0.1)'}`,
+                        background: paymentOption === '20' ? 'rgba(212,175,55,0.1)' : 'transparent',
+                        cursor: 'pointer', transition: 'all 0.2s', textAlign: 'center'
+                      }}
+                    >
+                      <span style={{ display: 'block', color: '#f5f5f5', fontWeight: 600, fontSize: '0.9rem' }}>Seña (20%)</span>
+                      <span style={{ display: 'block', color: '#d4af37', fontWeight: 700, fontSize: '1.2rem', marginTop: 4 }}>{formatCurrency(Math.round(totalPrice * 0.2))}</span>
+                    </div>
+                    <div 
+                      onClick={() => setPaymentOption('100')}
+                      style={{
+                        padding: 12, borderRadius: 8, border: `2px solid ${paymentOption === '100' ? '#d4af37' : 'rgba(255,255,255,0.1)'}`,
+                        background: paymentOption === '100' ? 'rgba(212,175,55,0.1)' : 'transparent',
+                        cursor: 'pointer', transition: 'all 0.2s', textAlign: 'center'
+                      }}
+                    >
+                      <span style={{ display: 'block', color: '#f5f5f5', fontWeight: 600, fontSize: '0.9rem' }}>Total (100%)</span>
+                      <span style={{ display: 'block', color: '#d4af37', fontWeight: 700, fontSize: '1.2rem', marginTop: 4 }}>{formatCurrency(totalPrice)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div style={{ background: 'rgba(212, 175, 55, 0.05)', border: '1px solid rgba(212, 175, 55, 0.2)', borderRadius: 8, padding: 16, marginBottom: 20, fontSize: '0.85rem', color: '#a0a0a0' }}>
-              <p>📋 Al confirmar, tu reserva quedará registrada. Deberás pagar la seña del 20% para asegurar tu turno.</p>
+              <p>📋 Al confirmar, serás redirigido a la pasarela de pago seguro para completar tu reserva.</p>
             </div>
 
             <button
@@ -836,7 +848,7 @@ export default function BookingPage() {
               className="btn-primary"
               style={{ width: '100%', padding: '16px', fontSize: '0.95rem' }}
             >
-              {loading ? 'Procesando...' : `Confirmar Reserva — Seña ${formatCurrency(Math.round(totalPrice * 0.2))}`}
+              {loading ? 'Procesando...' : `Ir a Pagar — ${paymentOption === '20' ? formatCurrency(Math.round(totalPrice * 0.2)) : formatCurrency(totalPrice)}`}
             </button>
           </div>
         )}

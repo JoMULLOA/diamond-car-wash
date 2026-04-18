@@ -5,6 +5,9 @@ import { WhatsAppButton } from '../components/WhatsAppButton';
 export const metadata: Metadata = {
   title: 'Diamond Car Wash — Reservar Turno',
   description: 'Reservá tu turno de lavado online y asegurá tu lugar con un 20% de seña. Servicios premium de lavado de vehículos.',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({

@@ -148,6 +148,9 @@ export interface Booking {
   status: BookingStatus;
   deposit_amount: number;
   total_amount: number;
+  paid_amount: number;
+  remaining_balance: number;
+  payment_option: string;
   mercado_pago_id: string | null;
   services?: { 
     id: string; 

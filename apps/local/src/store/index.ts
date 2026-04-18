@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { apiFetch } from '../api';
 import type { 
   EntryWithVehicle, 
   DashboardStats, 
@@ -7,6 +8,14 @@ import type {
   SubscriptionCache,
   ExitResult
 } from '@diamond/shared';
+
+// Auth state (persisted)
+interface AuthState {
+  token: string | null;
+  isAuthenticated: boolean;
+  login: (token: string) => void;
+  logout: () => void;
+}
 
 // Online/Offline state
 interface NetworkState {
@@ -53,6 +62,7 @@ interface SubscriptionCacheState {
 
 // Combined Store
 interface AppStore extends 
+  AuthState,
   NetworkState, 
   ActiveEntriesState, 
   StatsState, 
@@ -61,6 +71,21 @@ interface AppStore extends
   currentPayment: ExitResult | null;
   setCurrentPayment: (payment: ExitResult | null) => void;
 }
+
+// Auth Store (persisted)
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      token: null,
+      isAuthenticated: false,
+      login: (token: string) => set({ token, isAuthenticated: true }),
+      logout: () => set({ token: null, isAuthenticated: false }),
+    }),
+    {
+      name: 'diamond-auth',
+    }
+  )
+);
 
 // Active Entries Store
 export const useActiveEntriesStore = create<ActiveEntriesState>((set, get) => ({
@@ -71,7 +96,7 @@ export const useActiveEntriesStore = create<ActiveEntriesState>((set, get) => ({
   fetchActiveEntries: async () => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch('/api/entries/active');
+      const res = await apiFetch('/api/entries/active');
       const data = await res.json();
       set({ entries: data.entries || [], loading: false });
     } catch (err) {
@@ -100,7 +125,7 @@ export const useStatsStore = create<StatsState>((set) => ({
   fetchStats: async () => {
     set({ loading: true });
     try {
-      const res = await fetch('/api/dashboard/stats');
+      const res = await apiFetch('/api/dashboard/stats');
       const data = await res.json();
       set({ stats: data.stats || null, loading: false });
     } catch (err) {
@@ -125,7 +150,7 @@ export const useSettingsStore = create<SettingsState>()(
       fetchSettings: async () => {
         set({ loading: true });
         try {
-          const res = await fetch('/api/settings');
+          const res = await apiFetch('/api/settings');
           const data = await res.json();
           if (data.settings) {
             set({ settings: data.settings, loading: false });
@@ -142,9 +167,8 @@ export const useSettingsStore = create<SettingsState>()(
         const updated = { ...currentSettings, ...newSettings };
         
         try {
-          const res = await fetch('/api/settings', {
+          const res = await apiFetch('/api/settings', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ settings: updated }),
           });
           
@@ -212,6 +236,12 @@ export const useNetworkStore = create<NetworkState>((set) => ({
 
 // Combined App Store Hook
 export const useAppStore = create<AppStore>((set, get, api) => ({
+  // Auth (delegated to persisted store, but available here)
+  token: null,
+  isAuthenticated: false,
+  login: (token: string) => useAuthStore.getState().login(token),
+  logout: () => useAuthStore.getState().logout(),
+
   // Network
   isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
   setOnline: (status: boolean) => set({ isOnline: status }),
@@ -223,7 +253,7 @@ export const useAppStore = create<AppStore>((set, get, api) => ({
   fetchActiveEntries: async () => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch('/api/entries/active');
+      const res = await apiFetch('/api/entries/active');
       const data = await res.json();
       set({ entries: data.entries || [], loading: false });
     } catch (err) {
@@ -242,7 +272,7 @@ export const useAppStore = create<AppStore>((set, get, api) => ({
   fetchStats: async () => {
     set({ loading: true });
     try {
-      const res = await fetch('/api/dashboard/stats');
+      const res = await apiFetch('/api/dashboard/stats');
       const data = await res.json();
       set({ stats: data.stats || null, loading: false });
     } catch (err) {
@@ -261,7 +291,7 @@ export const useAppStore = create<AppStore>((set, get, api) => ({
   fetchSettings: async () => {
     set({ loading: true });
     try {
-      const res = await fetch('/api/settings');
+      const res = await apiFetch('/api/settings');
       const data = await res.json();
       if (data.settings) {
         set({ settings: data.settings, loading: false });
@@ -274,9 +304,8 @@ export const useAppStore = create<AppStore>((set, get, api) => ({
     const currentSettings = get().settings;
     const updated = { ...currentSettings, ...newSettings };
     try {
-      const res = await fetch('/api/settings', {
+      const res = await apiFetch('/api/settings', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ settings: updated }),
       });
       if (res.ok) set({ settings: updated });

@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
+import { authMiddleware } from './auth';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOADS_DIR = path.join(__dirname, '../../../public/uploads');
@@ -13,7 +14,7 @@ import { put } from '@vercel/blob';
 const router = new Hono();
 
 // POST /api/media/upload
-router.post('/upload', async (c) => {
+router.post('/upload', authMiddleware, async (c) => {
   try {
     const body = await c.req.parseBody();
     const file = body['file'] as File;
@@ -53,7 +54,7 @@ router.post('/upload', async (c) => {
 });
 
 // PUT /api/services/:id/media - Link media to service
-router.put('/services/:id', async (c) => {
+router.put('/services/:id', authMiddleware, async (c) => {
   try {
     const serviceId = c.req.param('id');
     const { media_url, media_type } = await c.req.json();

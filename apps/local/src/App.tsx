@@ -9,7 +9,9 @@ import { PaymentSummary } from './components/PaymentSummary';
 import { ServiceManager } from './components/ServiceManager';
 import { Agenda } from './components/Agenda';
 import { MemberManagement } from './components/MemberManagement';
-import { useAppStore, useSettingsStore } from './store';
+import { Login } from './components/Login';
+import { useAppStore, useSettingsStore, useAuthStore } from './store';
+import { apiFetch } from './api';
 
 type Tab = 'dashboard' | 'entry' | 'active' | 'history' | 'agenda' | 'services' | 'memberships';
 
@@ -24,6 +26,26 @@ function App() {
     isOnline
   } = useAppStore();
   const { isSettingsOpen, setSettingsOpen } = useSettingsStore();
+  const { isAuthenticated, logout } = useAuthStore();
+
+  // Initialize store and verify token
+  useEffect(() => {
+    const verifyToken = async () => {
+      try {
+        const res = await apiFetch('/api/auth/verify');
+        if (!res.ok) {
+          logout();
+        }
+      } catch {
+        logout();
+      }
+    };
+    if (isAuthenticated) {
+      verifyToken();
+      fetchActiveEntries();
+      fetchStats();
+    }
+  }, [isAuthenticated]);
 
   const handleEntrySuccess = () => {
     setRefreshKey((k) => k + 1);
@@ -91,6 +113,10 @@ function App() {
     { key: 'memberships', label: 'VIP', icon: '👑' },
   ];
 
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+
   return (
     <div className="min-h-screen grid-pattern">
       <OfflineIndicator />
@@ -128,6 +154,14 @@ function App() {
                 className={`w-3 h-3 rounded-full ${isOnline ? 'bg-yellow-500 animate-pulse' : 'bg-gray-600'}`}
                 style={{ boxShadow: isOnline ? '0 0 15px rgba(212, 175, 55, 0.6)' : 'none' }}
               />
+              
+              {/* Logout Button */}
+              <button 
+                onClick={logout}
+                className="ml-4 px-3 py-1 text-xs border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 rounded transition-colors"
+              >
+                Cerrar Sesión
+              </button>
             </div>
           </div>
         </div>

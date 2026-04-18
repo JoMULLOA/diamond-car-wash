@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { getDatabase } from '../../db/index';
 import { v4 as uuid } from 'uuid';
 import type { Service } from '../../shared';
+import { authMiddleware } from './auth';
 
 const router = new Hono();
 
@@ -43,7 +44,7 @@ router.get('/:id', async (c) => {
 });
 
 // POST /services - Create a new service
-router.post('/', async (c) => {
+router.post('/', authMiddleware, async (c) => {
   try {
     const { name, description, price, duration_minutes, max_quantity, media_url, media_type, process, tools_used } = await c.req.json();
 
@@ -73,7 +74,7 @@ router.post('/', async (c) => {
 });
 
 // PUT /services/:id - Update service
-router.put('/:id', async (c) => {
+router.put('/:id', authMiddleware, async (c) => {
   try {
     const id = c.req.param('id');
     const updates = await c.req.json();
@@ -114,7 +115,7 @@ router.put('/:id', async (c) => {
 });
 
 // DELETE /services/:id - Soft delete (set inactive)
-router.delete('/:id', async (c) => {
+router.delete('/:id', authMiddleware, async (c) => {
   try {
     const id = c.req.param('id');
     const db = getDatabase();

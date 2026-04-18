@@ -150,8 +150,10 @@ CREATE TABLE IF NOT EXISTS bookings (
   status TEXT NOT NULL DEFAULT 'pending_payment',
   deposit_amount REAL NOT NULL DEFAULT 0,
   total_amount REAL NOT NULL DEFAULT 0,
+  paid_amount REAL NOT NULL DEFAULT 0,
+  remaining_balance REAL NOT NULL DEFAULT 0,
+  payment_option TEXT NOT NULL DEFAULT '100',
   mercado_pago_id TEXT,
-  notes TEXT,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL,
   FOREIGN KEY (service_id) REFERENCES services(id)
@@ -235,7 +237,8 @@ export async function initDatabase(): Promise<void> {
         "INSERT OR IGNORE INTO settings (key, value) VALUES ('mercado_pago_access_token', '')",
         "INSERT OR IGNORE INTO settings (key, value) VALUES ('whatsapp_number', '56940889752')",
         "INSERT OR IGNORE INTO settings (key, value) VALUES ('instagram_url', 'https://www.instagram.com/diamondcarwash.arauco/')",
-        "INSERT OR IGNORE INTO settings (key, value) VALUES ('facebook_url', 'https://www.facebook.com/people/DiamondcarwuashArauco/100064216656842/')"
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('facebook_url', 'https://www.facebook.com/people/DiamondcarwuashArauco/100064216656842/')",
+        "INSERT OR IGNORE INTO settings (key, value) VALUES ('admin_password_hash', '')"
       ], 'write');
       console.log('[DB] Schema and default settings created');
     } else {

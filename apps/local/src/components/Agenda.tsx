@@ -287,17 +287,36 @@ export function Agenda() {
                           </div>
 
                           {/* Actions */}
-                          <div className="flex items-center gap-2 ml-auto sm:ml-0">
-                            <span className="text-sm font-medium text-yellow-500">
-                              {formatCurrency(booking.total_amount)}
-                            </span>
+                          <div className="flex flex-col items-end gap-1 ml-auto sm:ml-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-gray-500">
+                                Total: {formatCurrency(booking.total_amount)}
+                              </span>
+                              {(booking.remaining_balance > 0 || booking.status === 'pending_payment') && (
+                                <span className="text-sm font-bold text-yellow-500">
+                                  Saldo: {formatCurrency(booking.remaining_balance ?? booking.total_amount)}
+                                </span>
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center gap-2 mt-2">
 
                             {booking.status === 'pending_payment' && (
                               <button
                                 onClick={() => handleAction(booking.id, 'confirm')}
                                 className="px-3 py-1.5 text-xs rounded border border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10 transition-colors"
                               >
-                                Confirmar
+                                Confirmar Web
+                              </button>
+                            )}
+                            {/* TUU POS INTEGRATION */}
+                            {(booking.remaining_balance > 0 || booking.status === 'pending_payment') && booking.status !== 'cancelled' && (
+                              <button
+                                onClick={() => handleAction(booking.id, 'tuu-remote')}
+                                className="px-3 py-1.5 text-xs flex items-center gap-1 rounded border border-blue-500/40 text-blue-400 hover:bg-blue-500/10 transition-colors"
+                                title="Enviar cobro al terminal POS"
+                              >
+                                💳 POS
                               </button>
                             )}
                             {booking.status === 'confirmed' && (
@@ -324,6 +343,7 @@ export function Agenda() {
                                 Cancelar
                               </button>
                             )}
+                            </div>
                           </div>
                         </div>
                       </div>

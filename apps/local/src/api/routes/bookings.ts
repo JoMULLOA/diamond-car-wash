@@ -2,6 +2,8 @@ import { Hono } from 'hono';
 import { getDatabase } from '../../db/index';
 import { v4 as uuid } from 'uuid';
 import type { Booking, Service } from '../../shared';
+import { TuuProvider } from '../services/payment/TuuProvider';
+import { authMiddleware } from './auth';
 
 const router = new Hono();
 
@@ -23,7 +25,7 @@ function timesOverlap(
 }
 
 // GET /bookings - List bookings (with optional date filter)
-router.get('/', async (c) => {
+router.get('/', authMiddleware, async (c) => {
   try {
     const db = getDatabase();
     const date = c.req.query('date');       // YYYY-MM-DD
@@ -207,7 +209,7 @@ router.get('/availability', async (c) => {
 // POST /bookings - Create a new booking
 router.post('/', async (c) => {
   try {
-    const { service_ids, service_id, cart, client_name, client_phone, client_patent, booking_date, start_time, notes, is_subscription, membership_id } = await c.req.json();
+    const { service_ids, service_id, cart, client_name, client_phone, client_patent, booking_date, start_time, notes, is_subscription, membership_id, payment_option = '100' } = await c.req.json();
 
     let finalCart: { id: string, qty: number }[] = [];
     if (cart && Array.isArray(cart)) {
@@ -321,14 +323,27 @@ router.post('/', async (c) => {
       ? `👑 SOCIO DIAMOND — Canje de lavado mensual${notes ? '. ' + notes : ''}`
       : (notes || null);
 
+    // Calculate how much to charge online based on payment_option
+    let amountToCharge = 0;
+    if (isSubBooking) {
+      amountToCharge = 0;
+    } else if (payment_option === '20') {
+      amountToCharge = depositAmount;
+    } else {
+      amountToCharge = totalPrice;
+    }
+    
+    // Initial balances (remaining balance is only accurate AFTER payment online is confirmed, but we set the expected here)
+    const expectedRemaining = isSubBooking ? 0 : (totalPrice - amountToCharge);
+
     await db.run(
       `INSERT INTO bookings (id, service_id, client_name, client_phone, client_patent,
         booking_date, start_time, end_time, status, deposit_amount, total_amount,
-        mercado_pago_id, notes, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?)`,
+        paid_amount, remaining_balance, payment_option, mercado_pago_id, notes, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?)`,
       [id, finalCart[0].id, client_name, client_phone, normalizedPatent,
        booking_date, start_time, endTime, initialStatus, depositAmount, totalPrice,
-       bookingNotes, now, now]
+       0, totalPrice, payment_option, bookingNotes, now, now]
     );
 
     for (const item of finalCart) {
@@ -352,51 +367,30 @@ router.post('/', async (c) => {
       [id]
     );
 
-    // ---- MP Integration (skip for subscriptions) ----
+    // ---- TUU Integration (skip for subscriptions) ----
     let initPoint = null;
     if (!isSubBooking) {
-      const mpToken = (await db.get<{ value: string }>("SELECT value FROM settings WHERE key = 'mercado_pago_access_token'"))?.value;
+      // Reusing the MP token column temporarily until dashboard is updated to say "TUU API Key"
+      const apiKey = (await db.get<{ value: string }>("SELECT value FROM settings WHERE key = 'mercado_pago_access_token'"))?.value;
+      
+      if (apiKey && amountToCharge > 0) {
+        console.log('[POST /bookings] Generando checkout de TUU online...');
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001';
+        
+        const tuuProvider = new TuuProvider(apiKey);
+        const paymentRes = await tuuProvider.createPayment({
+          id,
+          amount: amountToCharge,
+          title: `Checkout - ${serviceNames.join(', ')}`,
+          successUrl: `${siteUrl}?status=success&booking=${id}`,
+          failureUrl: `${siteUrl}?status=failure&booking=${id}`,
+        });
 
-      if (mpToken && depositAmount > 0) {
-        try {
-          console.log('[POST /bookings] Generando preferencia de Mercado Pago...');
-              const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001';
-              const backUrls = {
-                success: `${siteUrl}?status=success&booking=${id}`,
-                failure: `${siteUrl}?status=failure&booking=${id}`,
-                pending: `${siteUrl}?status=pending&booking=${id}`
-              };
-
-              const mpResponse = await fetch('https://api.mercadopago.com/checkout/preferences', {
-                method: 'POST',
-                headers: {
-                  'Authorization': `Bearer ${mpToken}`,
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  items: [
-                    {
-                      title: `Seña Reserva - ${serviceNames.join(', ')}`,
-                      quantity: 1,
-                      unit_price: depositAmount,
-                      currency_id: 'CLP'
-                    }
-                  ],
-                  external_reference: id,
-                  back_urls: backUrls,
-                  auto_return: 'approved'
-                })
-              });
-
-          if (mpResponse.ok) {
-            const mpData = await mpResponse.json();
-            initPoint = mpData.init_point;
-            await db.run(`UPDATE bookings SET mercado_pago_id = ? WHERE id = ?`, [mpData.id, id]);
-          } else {
-            console.error('[MP Error]', await mpResponse.text());
-          }
-        } catch (mpErr) {
-          console.error('[MP Fetch Error]', mpErr);
+        if (paymentRes.paymentUrl) {
+          initPoint = paymentRes.paymentUrl;
+          await db.run(`UPDATE bookings SET mercado_pago_id = ? WHERE id = ?`, [paymentRes.providerId, id]);
+        } else {
+          console.error('[TUU Error]', paymentRes.error);
         }
       }
     }
@@ -442,9 +436,18 @@ router.put('/:id/confirm', async (c) => {
       return c.json({ error: 'La reserva no está pendiente de pago' }, 400);
     }
 
+    // Determine how much was paid based on payment_option
+    let paidAmount = 0;
+    if (booking.payment_option === '20') {
+      paidAmount = booking.deposit_amount;
+    } else {
+      paidAmount = booking.total_amount;
+    }
+    const remainingBalance = booking.total_amount - paidAmount;
+
     await db.run(
-      `UPDATE bookings SET status = 'confirmed', mercado_pago_id = ?, updated_at = ? WHERE id = ?`,
-      [mercadoPagoId, Date.now(), id]
+      `UPDATE bookings SET status = 'confirmed', mercado_pago_id = ?, paid_amount = ?, remaining_balance = ?, updated_at = ? WHERE id = ?`,
+      [mercadoPagoId, paidAmount, remainingBalance, Date.now(), id]
     );
 
     // ---- WhatsApp Notification Stub ----
@@ -459,8 +462,63 @@ router.put('/:id/confirm', async (c) => {
   }
 });
 
+// PUT /bookings/:id/tuu-remote - Trigger POS payment form Agenda
+router.put('/:id/tuu-remote', authMiddleware, async (c) => {
+  try {
+    const id = c.req.param('id');
+    const db = getDatabase();
+
+    const booking = await db.get<Booking>('SELECT * FROM bookings WHERE id = ?', [id]);
+    if (!booking) return c.json({ error: 'Reserva no encontrada' }, 404);
+
+    if (booking.status === 'cancelled') {
+        return c.json({ error: 'La reserva está cancelada' }, 400);
+    }
+
+    const amountToCharge = booking.remaining_balance > 0 ? booking.remaining_balance : booking.total_amount;
+    
+    if (amountToCharge <= 0) {
+       return c.json({ error: 'No hay saldo pendiente por cobrar' }, 400);
+    }
+
+    const apiKey = (await db.get<{ value: string }>("SELECT value FROM settings WHERE key = 'mercado_pago_access_token'"))?.value;
+    if (!apiKey) {
+      // Allow simulation if no API key is provided
+      console.log('[TUU Remote] Simulando cobro exitoso SIN llave API configurada...');
+      await db.run(
+        `UPDATE bookings SET status = 'completed', paid_amount = ?, remaining_balance = 0, updated_at = ? WHERE id = ?`,
+        [booking.total_amount, Date.now(), id]
+      );
+      return c.json({ success: true, status: 'completed' });
+    }
+
+    const tuuProvider = new TuuProvider(apiKey);
+    console.log(`[TUU Remote] Despertando POS para cobrar ${amountToCharge}...`);
+    
+    const success = await tuuProvider.triggerRemotePayment({
+      id: booking.id,
+      amount: amountToCharge,
+    });
+
+    if (success) {
+      // Assuming synchronous success or we listen to webhooks. Haulmer POS endpoints can block or return immediatley depending on implementation.
+      // If we assume it returns success when printed:
+      await db.run(
+        `UPDATE bookings SET status = 'completed', paid_amount = ?, remaining_balance = 0, updated_at = ? WHERE id = ?`,
+        [booking.total_amount, Date.now(), id]
+      );
+      return c.json({ success: true, status: 'completed' });
+    } else {
+      return c.json({ error: 'Error del terminal POS / Pago denegado' }, 500);
+    }
+  } catch (err) {
+    console.error('[PUT /bookings/:id/tuu-remote]', err);
+    return c.json({ error: 'Failed to trigger remote POS' }, 500);
+  }
+});
+
 // PUT /bookings/:id/complete - Mark booking as completed (when client arrives)
-router.put('/:id/complete', async (c) => {
+router.put('/:id/complete', authMiddleware, async (c) => {
   try {
     const id = c.req.param('id');
     const db = getDatabase();
@@ -482,7 +540,7 @@ router.put('/:id/complete', async (c) => {
 });
 
 // PUT /bookings/:id/cancel - Cancel booking
-router.put('/:id/cancel', async (c) => {
+router.put('/:id/cancel', authMiddleware, async (c) => {
   try {
     const id = c.req.param('id');
     const db = getDatabase();
@@ -508,7 +566,7 @@ router.put('/:id/cancel', async (c) => {
 });
 
 // PUT /bookings/:id/no-show - Mark as no-show
-router.put('/:id/no-show', async (c) => {
+router.put('/:id/no-show', authMiddleware, async (c) => {
   try {
     const id = c.req.param('id');
     const db = getDatabase();
