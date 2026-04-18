@@ -33,11 +33,16 @@ export function MainDashboard() {
     const verifyToken = async () => {
       try {
         const res = await apiFetch('/api/auth/verify');
-        if (!res.ok) {
+        if (res.status === 401) {
+          // Token inválido o expirado → cerrar sesión
+          console.warn('[MainDashboard] Token rechazado por el servidor (401). Cerrando sesión.');
           logout();
         }
-      } catch (_err) {
-        logout();
+        // Cualquier otro error (500, red caída, etc.) → mantener sesión
+        // No queremos expulsar al usuario por un fallo temporal del servidor
+      } catch (err) {
+        console.warn('[MainDashboard] No se pudo verificar token (fallo de red). Sesión mantenida.', err);
+        // No hacemos logout aquí — es un error de red, no de autenticación
       }
     };
     if (isAuthenticated) {

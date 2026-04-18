@@ -5,9 +5,11 @@ import crypto from 'crypto';
 
 const router = new Hono();
 
-// The secret for JWT signing. 
-// In production, this should ideally be an environment variable.
-const JWT_SECRET = process.env.JWT_SECRET || 'diamond-car-wash-super-secret-key-2026';
+// Lazy getter para evitar timing issues: en Next.js los env vars a veces
+// no están disponibles en el momento que se evaluan las constantes de módulo.
+function getJwtSecret(): string {
+  return process.env.JWT_SECRET || 'diamond-car-wash-super-secret-key-2026';
+}
 
 // Helper to hash passwords using Node's crypto
 function hashPassword(password: string): string {
@@ -48,7 +50,7 @@ router.post('/login', async (c) => {
       exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30, // 30 days
     };
     
-    const token = await sign(payload, JWT_SECRET);
+    const token = await sign(payload, getJwtSecret());
 
     return c.json({ 
       success: true, 
@@ -70,8 +72,7 @@ router.get('/verify', async (c) => {
     }
 
     const token = authHeader.split(' ')[1];
-    await verify(token, JWT_SECRET, 'HS256');
-    
+    await verify(token, getJwtSecret(), 'HS256');
     return c.json({ valid: true });
   } catch (_err) {
     return c.json({ valid: false }, 401);
@@ -86,13 +87,17 @@ export const authMiddleware = async (c: any, next: any) => {
   }
 
   const token = authHeader.split(' ')[1];
+  const secret = getJwtSecret();
+  console.log(`[AUTH] Verificando token. Secreto activo: ${secret.substring(0, 10)}...`);
   try {
-    const payload = await verify(token, JWT_SECRET, 'HS256');
+    const payload = await verify(token, secret, 'HS256');
     if (payload.role !== 'admin') {
+      console.warn('[AUTH] Token válido pero rol no es admin:', payload.role);
       return c.json({ error: 'Acceso denegado' }, 403);
     }
     await next();
-  } catch (_err) {
+  } catch (err) {
+    console.error('[AUTH] Token inválido o expirado:', err instanceof Error ? err.message : err);
     return c.json({ error: 'Token inválido o expirado' }, 401);
   }
 };

@@ -43,7 +43,11 @@ body {
   background: var(--obsidian);
   color: var(--text-primary);
   min-height: 100vh;
-  /* Diamond premium background */
+}
+
+/* Fondo con imagen solo para el portal administrativo */
+.admin-portal-wrapper {
+  min-height: 100vh;
   background-image: url('/fondoDiamond.png');
   background-size: cover;
   background-position: center;
@@ -51,8 +55,7 @@ body {
   position: relative;
 }
 
-/* Overlay oscuro para legibilidad */
-body::after {
+.admin-portal-wrapper::after {
   content: '';
   position: fixed;
   top: 0;
