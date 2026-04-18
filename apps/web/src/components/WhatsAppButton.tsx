@@ -25,70 +25,18 @@ export function WhatsAppButton() {
   const whatsappUrl = `https://wa.me/${finalNumber.replace(/[\s+]/g, '')}?text=${message}`;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        bottom: '30px',
-        right: '30px',
-        zIndex: 9999,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-      }}
-    >
+    <div className="whatsapp-container">
       {/* Mensaje sugerido / Bubble */}
-      <div 
-        className="animate-fade-in"
-        style={{
-          background: 'rgba(20, 20, 20, 0.85)',
-          backdropFilter: 'blur(10px)',
-          padding: '10px 18px',
-          borderRadius: '16px',
-          border: '1px solid rgba(212, 175, 55, 0.3)',
-          color: '#f5f5f5',
-          fontSize: '0.85rem',
-          fontWeight: 500,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-          whiteSpace: 'nowrap',
-          pointerEvents: 'none',
-          position: 'relative',
-          animation: 'float 3s ease-in-out infinite'
-        }}
-      >
-        Hola, quiero más información de los lavados.
-        {/* Triangulito apuntando al logo */}
-        <div style={{
-          position: 'absolute',
-          right: '-6px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          width: 0,
-          height: 0,
-          borderTop: '6px solid transparent',
-          borderBottom: '6px solid transparent',
-          borderLeft: '6px solid rgba(212, 175, 55, 0.3)'
-        }}></div>
+      <div className="whatsapp-bubble animate-fade-in">
+        <span className="whatsapp-desktop-text">Hola, quiero más información de los lavados.</span>
+        <span className="whatsapp-mobile-text">¿Dudas? Escríbenos</span>
       </div>
 
       <a
         href={whatsappUrl}
         target="_blank"
         rel="noopener noreferrer"
-        style={{
-          width: '60px',
-          height: '60px',
-          backgroundColor: '#25D366',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 4px 15px rgba(0,0,0,0.3), 0 0 20px rgba(37, 211, 102, 0.4)',
-          transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-          cursor: 'pointer',
-          border: '2px solid rgba(255, 255, 255, 0.2)'
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.15) rotate(5deg)')}
-        onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1) rotate(0deg)')}
+        className="whatsapp-btn"
         title="Contactanos por WhatsApp"
       >
         <svg

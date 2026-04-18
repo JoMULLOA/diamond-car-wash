@@ -77,7 +77,7 @@ export default function HomePage() {
 
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/lavado-de-autos-arauco" className="btn-primary" style={{ padding: '16px 32px', fontSize: '1rem', textDecoration: 'none' }}>
-              RESERVAR LAVADO
+              RESERVA TU LAVADO
             </Link>
           </div>
         </div>
@@ -94,11 +94,14 @@ export default function HomePage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
 
             {/* Lavado Service */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: '3rem', marginBottom: 20 }}>🧼</div>
+            <div className="card" style={{ 
+              display: 'flex', flexDirection: 'column',
+              backgroundImage: 'linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.95)), url("/img/services/bg_lavado_detailing.png")',
+              backgroundSize: 'cover', backgroundPosition: 'center',
+            }}>
               <h3 style={{ fontSize: '1.5rem', color: '#d4af37', marginBottom: 12 }}>Lavado & Detailing</h3>
               <p style={{ color: '#a0a0a0', lineHeight: 1.6, marginBottom: 24, flex: 1 }}>
-                Tratamientos cerámicos, limpieza interior profunda y lavado exterior con productos de alta gama. Devolvele el brillo de fábrica a tu vehículo.
+                Tratamientos cerámicos, limpieza interior profunda y lavado exterior con productos de alta gama. Devuelve el brillo de fábrica a tu vehículo.
               </p>
               <Link href="/lavado-de-autos-arauco" style={{ color: '#f5f5f5', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8, transition: 'color 0.3s' }}>
                 Ver Catálogo y Reservar <span style={{ color: '#d4af37' }}>→</span>
@@ -106,8 +109,11 @@ export default function HomePage() {
             </div>
 
             {/* Estacionamiento Service */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: '3rem', marginBottom: 20 }}>🅿️</div>
+            <div className="card" style={{ 
+              display: 'flex', flexDirection: 'column',
+              backgroundImage: 'linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.95)), url("/img/services/bg_estacionamiento.png")',
+              backgroundSize: 'cover', backgroundPosition: 'center',
+            }}>
               <h3 style={{ fontSize: '1.5rem', color: '#d4af37', marginBottom: 12 }}>Estacionamiento Seguro</h3>
               <p style={{ color: '#a0a0a0', lineHeight: 1.6, marginBottom: 24, flex: 1 }}>
                 Tu vehículo merece estar seguro. Ofrecemos tarifas por minuto y planes para estadías prolongadas en pleno Arauco.
@@ -116,11 +122,14 @@ export default function HomePage() {
             </div>
 
             {/* Mensualidad Estacionamiento */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', border: '1px solid rgba(212, 175, 55, 0.4)' }}>
+            <div className="card" style={{ 
+              display: 'flex', flexDirection: 'column', border: '1px solid rgba(212, 175, 55, 0.4)',
+              backgroundImage: 'linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.95)), url("/img/services/bg_socio_vip.png")',
+              backgroundSize: 'cover', backgroundPosition: 'center',
+            }}>
               <div style={{ position: 'absolute', top: 12, right: 12 }}>
                 <span style={{ background: 'rgba(212, 175, 55, 0.1)', color: '#d4af37', padding: '4px 12px', borderRadius: 50, fontSize: '0.75rem', fontWeight: 600, border: '1px solid rgba(212, 175, 55, 0.3)' }}>VIP</span>
               </div>
-              <div style={{ fontSize: '3rem', marginBottom: 20 }}>👑</div>
               <h3 style={{ fontSize: '1.5rem', color: '#d4af37', marginBottom: 12 }}>Socio Estacionamiento</h3>
               <p style={{ color: '#a0a0a0', lineHeight: 1.6, marginBottom: 24, flex: 1 }}>
                 Asegura tu lugar de estacionamiento mensual. Paga una vez al mes y estaciona sin preocupaciones.
@@ -131,11 +140,14 @@ export default function HomePage() {
             </div>
 
             {/* Club de Lavado */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', border: '1px solid rgba(212, 175, 55, 0.4)' }}>
+            <div className="card" style={{ 
+              display: 'flex', flexDirection: 'column', border: '1px solid rgba(212, 175, 55, 0.4)',
+              backgroundImage: 'linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.95)), url("/img/services/bg_club_lavado.png")',
+              backgroundSize: 'cover', backgroundPosition: 'center',
+            }}>
               <div style={{ position: 'absolute', top: 12, right: 12 }}>
                 <span style={{ background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(59, 130, 246, 0.15))', color: '#60a5fa', padding: '4px 12px', borderRadius: 50, fontSize: '0.75rem', fontWeight: 600, border: '1px solid rgba(59, 130, 246, 0.3)' }}>PREMIUM</span>
               </div>
-              <div style={{ fontSize: '3rem', marginBottom: 20 }}>💎</div>
               <h3 style={{ fontSize: '1.5rem', color: '#d4af37', marginBottom: 12 }}>Club de Lavado</h3>
               <p style={{ color: '#a0a0a0', lineHeight: 1.6, marginBottom: 24, flex: 1 }}>
                 Suscripción mensual de lavado completo. Paga 3 lavados y el 4to es gratis. Agenda tus turnos online.
