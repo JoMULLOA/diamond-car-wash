@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 // ---- Types ----
 interface Service {
@@ -77,6 +78,24 @@ function formatDateDisplay(dateStr: string) {
 
 // ---- Main Page ----
 export default function BookingPage() {
+  const router = useRouter();
+  const clickCount = useRef(0);
+  const clickTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSecretClick = () => {
+    clickCount.current += 1;
+    if (clickTimer.current) clearTimeout(clickTimer.current);
+    
+    if (clickCount.current >= 5) {
+      router.push('/nimda-portal');
+      clickCount.current = 0;
+    } else {
+      clickTimer.current = setTimeout(() => {
+        clickCount.current = 0;
+      }, 1500);
+    }
+  };
+
   const [step, setStep] = useState<Step>('service');
   const [services, setServices] = useState<Service[]>([]);
   const [cart, setCart] = useState<{ service: Service, quantity: number }[]>([]);
@@ -988,7 +1007,10 @@ export default function BookingPage() {
 
       {/* Footer */}
       <footer style={{ padding: '32px 20px', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', marginTop: 40 }}>
-        <p style={{ color: '#333', fontSize: '0.75rem', letterSpacing: '0.15em' }}>
+        <p 
+          style={{ color: '#333', fontSize: '0.75rem', letterSpacing: '0.15em', userSelect: 'none', cursor: 'default' }}
+          onClick={handleSecretClick}
+        >
           DIAMOND CAR WASH — Premium Parking System
         </p>
       </footer>
