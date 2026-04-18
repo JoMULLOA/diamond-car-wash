@@ -68,13 +68,17 @@ router.get('/verify', async (c) => {
   try {
     const authHeader = c.req.header('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.warn('[AUTH/verify] Falla: header Authorization ausente o inválido.');
       return c.json({ valid: false }, 401);
     }
 
     const token = authHeader.split(' ')[1];
-    await verify(token, getJwtSecret(), 'HS256');
+    const secret = getJwtSecret();
+    console.log(`[AUTH/verify] Verificando token con secreto: ${secret.substring(0, 10)}...`);
+    await verify(token, secret, 'HS256');
     return c.json({ valid: true });
-  } catch (_err) {
+  } catch (err) {
+    console.error('[AUTH/verify] Error verificando token:', err instanceof Error ? err.message : err);
     return c.json({ valid: false }, 401);
   }
 });

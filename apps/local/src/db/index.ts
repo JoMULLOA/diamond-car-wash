@@ -129,15 +129,6 @@ CREATE TABLE IF NOT EXISTS services (
 
 CREATE INDEX IF NOT EXISTS idx_services_active ON services(active);
 
-CREATE TABLE IF NOT EXISTS booking_services (
-  booking_id TEXT NOT NULL,
-  service_id TEXT NOT NULL,
-  quantity INTEGER NOT NULL DEFAULT 1,
-  PRIMARY KEY (booking_id, service_id),
-  FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
-  FOREIGN KEY (service_id) REFERENCES services(id)
-);
-
 CREATE TABLE IF NOT EXISTS bookings (
   id TEXT PRIMARY KEY,
   service_id TEXT NOT NULL,
@@ -156,6 +147,15 @@ CREATE TABLE IF NOT EXISTS bookings (
   mercado_pago_id TEXT,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL,
+  FOREIGN KEY (service_id) REFERENCES services(id)
+);
+
+CREATE TABLE IF NOT EXISTS booking_services (
+  booking_id TEXT NOT NULL,
+  service_id TEXT NOT NULL,
+  quantity INTEGER NOT NULL DEFAULT 1,
+  PRIMARY KEY (booking_id, service_id),
+  FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
   FOREIGN KEY (service_id) REFERENCES services(id)
 );
 
@@ -242,7 +242,85 @@ export async function initDatabase(): Promise<void> {
       ], 'write');
       console.log('[DB] Schema and default settings created');
     } else {
-      // console.log('[DB] Connection verified, schema already exists');
+      // Auto-migrate tables to ensure all columns exist
+      console.log('[DB] Database exists, syncing schema...');
+      
+      const statements = SCHEMA.split(';')
+        .map(s => s.trim())
+        .filter(s => s.length > 0 && s.startsWith('CREATE TABLE IF NOT EXISTS'));
+
+      for (const statement of statements) {
+        // Extract table name
+        const match = statement.match(/CREATE TABLE IF NOT EXISTS\s+([a-zA-Z0-9_]+)\s*\(([\s\S]+)\)/i);
+        if (!match) continue;
+        
+        const tableName = match[1];
+        const columnsDef = match[2];
+        
+        // Check if table exists in SQLite
+        const tableCheck = await client.execute({
+          sql: "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+          args: [tableName]
+        });
+        
+        if (tableCheck.rows.length === 0) {
+           // Table is entirely missing (e.g. newly added table like monthly_payments)
+           console.log(`[DB] Creating missing table: ${tableName}`);
+           await client.execute(statement);
+           continue;
+        }
+
+        // Table exists, check columns
+        const pragma = await client.execute(`PRAGMA table_info(${tableName})`);
+        const existingColumns = pragma.rows.map(r => r.name as string);
+
+        // Parse desired columns from definition
+        const colLines = columnsDef.split(',')
+          .map(c => c.trim())
+          .filter(c => {
+             const upperCol = c.toUpperCase();
+             return !upperCol.startsWith('FOREIGN KEY') && 
+                    !upperCol.startsWith('PRIMARY KEY') &&
+                    !upperCol.startsWith('UNIQUE');
+          });
+
+        for (let line of colLines) {
+           // Skip empty or comment lines completely, or strip inline comments
+           if (line.startsWith('--')) continue;
+           
+           // If line has an inline comment, split by '--' and take first part
+           if (line.includes('--')) {
+             line = line.split('--')[0].trim();
+           }
+           
+           const parts = line.split(/\s+/);
+           const colName = parts[0];
+           
+           // Make sure it looks like a valid column name and not something random
+           if (!colName || colName.match(/[^a-zA-Z0-9_]/)) continue;
+           
+           if (!existingColumns.includes(colName)) {
+             try {
+               const addColSql = `ALTER TABLE ${tableName} ADD COLUMN ${line}`;
+               console.log(`[DB] Adding missing column: ${tableName}.${colName}`);
+               await client.execute(addColSql);
+             } catch (e) {
+               console.error(`[DB] Failed to add column ${colName} to ${tableName}:`, e);
+             }
+           }
+        }
+      }
+      
+      // Also ensure all indexes are created
+      const indexStatements = SCHEMA.split(';')
+        .map(s => s.trim())
+        .filter(s => s.length > 0 && s.startsWith('CREATE INDEX IF NOT EXISTS'));
+        
+      if (indexStatements.length > 0) {
+        await client.batch(indexStatements, 'write');
+      }
+      
+      console.log('[DB] Schema sync complete');
     }
 
     initialized = true;
