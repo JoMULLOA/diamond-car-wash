@@ -73,7 +73,7 @@ router.get('/verify', async (c) => {
     await verify(token, JWT_SECRET);
     
     return c.json({ valid: true });
-  } catch {
+  } catch (_err) {
     return c.json({ valid: false }, 401);
   }
 });
@@ -92,7 +92,7 @@ export const authMiddleware = async (c: any, next: any) => {
       return c.json({ error: 'Acceso denegado' }, 403);
     }
     await next();
-  } catch {
+  } catch (_err) {
     return c.json({ error: 'Token inválido o expirado' }, 401);
   }
 };

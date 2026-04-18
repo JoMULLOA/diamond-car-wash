@@ -42,7 +42,7 @@ export function PaymentSummary({ exit, onConfirm, onCancel }: PaymentSummaryProp
 
     try {
       await onConfirm();
-    } catch {
+    } catch (_err) {
       setError('Error al procesar. Intenta nuevamente.');
       setLoading(false);
     }

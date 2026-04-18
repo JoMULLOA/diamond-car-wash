@@ -104,7 +104,7 @@ router.get('/availability', async (c) => {
     if (cartParam) {
       try {
         cartItems = JSON.parse(decodeURIComponent(cartParam));
-      } catch {
+      } catch (_err) {
         return c.json({ error: 'Formato de carrito inválido' }, 400);
       }
     } else if (serviceIdsParam) {

@@ -21,7 +21,7 @@ export function tryNormalizePatent(patent: string): string | null {
       return normalized;
     }
     return null;
-  } catch {
+  } catch (_err) {
     return null;
   }
 }

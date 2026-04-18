@@ -196,7 +196,7 @@ export default function BookingPage() {
       } else {
         setError(data.error || 'Error al crear la reserva');
       }
-    } catch {
+    } catch (_err) {
       setError('Error de conexión. Intenta de nuevo.');
     } finally {
       setLoading(false);

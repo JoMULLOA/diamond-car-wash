@@ -119,7 +119,7 @@ export default function ClubLavadoPage() {
       } else {
         setError(data.error || 'Error al consultar');
       }
-    } catch {
+    } catch (_err) {
       setError('Error de conexión. Intenta de nuevo.');
     } finally {
       setLoading(false);
@@ -147,7 +147,7 @@ export default function ClubLavadoPage() {
         const data = await res.json();
         alert(data.error || 'Error al procesar el pago');
       }
-    } catch {
+    } catch (_err) {
       alert('Error de conexión al procesar pago');
     } finally {
       setPaying(false);
@@ -203,7 +203,7 @@ export default function ClubLavadoPage() {
       } else {
         setError(data.error || 'Error al crear la reserva');
       }
-    } catch {
+    } catch (_err) {
       setError('Error de conexión. Intenta de nuevo.');
     } finally {
       setBookingLoading(false);

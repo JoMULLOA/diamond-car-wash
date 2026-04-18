@@ -36,7 +36,7 @@ function App() {
         if (!res.ok) {
           logout();
         }
-      } catch {
+      } catch (_err) {
         logout();
       }
     };
