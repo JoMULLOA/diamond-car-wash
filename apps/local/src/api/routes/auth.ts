@@ -55,8 +55,8 @@ router.post('/login', async (c) => {
       token,
       message: currentHash === hashSetting?.value ? 'Login exitoso' : 'Contraseña configurada con éxito'
     });
-  } catch (err) {
-    console.error('[POST /api/auth/login]', err);
+  } catch (error) {
+    console.error('[POST /api/auth/login]', error);
     return c.json({ error: 'Error en la autenticación' }, 500);
   }
 });
@@ -73,7 +73,7 @@ router.get('/verify', async (c) => {
     await verify(token, JWT_SECRET);
     
     return c.json({ valid: true });
-  } catch (err) {
+  } catch {
     return c.json({ valid: false }, 401);
   }
 });
@@ -92,7 +92,7 @@ export const authMiddleware = async (c: any, next: any) => {
       return c.json({ error: 'Acceso denegado' }, 403);
     }
     await next();
-  } catch (err) {
+  } catch {
     return c.json({ error: 'Token inválido o expirado' }, 401);
   }
 };

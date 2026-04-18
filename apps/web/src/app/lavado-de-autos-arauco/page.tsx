@@ -87,6 +87,9 @@ export default function BookingPage() {
   const [clientData, setClientData] = useState({ name: '', phone: '', patent: '' });
   const [paymentOption, setPaymentOption] = useState<'20' | '100'>('20');
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null);
+  const [expandedServiceId, setExpandedServiceId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const totalDuration = cart.reduce((acc, curr) => acc + curr.service.duration_minutes * curr.quantity, 0);
   const totalPrice = cart.reduce((acc, curr) => acc + curr.service.price * curr.quantity, 0);
