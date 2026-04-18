@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiFetch } from '../api';
 
 interface Service {
   id: string;
@@ -49,7 +50,7 @@ export function MemberManagement() {
   const fetchMemberships = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/memberships');
+      const res = await apiFetch('/api/memberships');
       const data = await res.json();
       if (res.ok) {
         setMemberships(data.memberships || []);
@@ -65,7 +66,7 @@ export function MemberManagement() {
 
   const fetchServices = async () => {
     try {
-      const res = await fetch('/api/services?active=1');
+      const res = await apiFetch('/api/services?active=1');
       const data = await res.json();
       setServices(data.services || []);
     } catch (err) {
@@ -118,7 +119,7 @@ export function MemberManagement() {
       
       console.log('[MemberManagement] Sending:', JSON.stringify(payload));
       
-      const res = await fetch('/api/memberships', {
+      const res = await apiFetch('/api/memberships', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -146,7 +147,7 @@ export function MemberManagement() {
     
     const d = new Date();
     try {
-      const res = await fetch('/api/memberships/pay', {
+      const res = await apiFetch('/api/memberships/pay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

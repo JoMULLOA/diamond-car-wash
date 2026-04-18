@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { DashboardStats } from '../shared';
 import { useSettingsStore } from '../store';
+import { apiFetch } from '../api';
 
 export function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -10,7 +11,7 @@ export function Dashboard() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const res = await fetch('/api/dashboard/stats');
+      const res = await apiFetch('/api/dashboard/stats');
       const data = await res.json();
       setStats(data.stats || null);
       setLastUpdate(new Date());

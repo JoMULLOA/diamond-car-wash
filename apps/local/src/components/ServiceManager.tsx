@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Service } from '../shared';
+import { apiFetch } from '../api';
 
 export function ServiceManager() {
   const [services, setServices] = useState<Service[]>([]);
@@ -24,7 +25,7 @@ export function ServiceManager() {
 
   const fetchServices = async () => {
     try {
-      const res = await fetch('/api/services?t=' + Date.now(), {
+      const res = await apiFetch('/api/services?t=' + Date.now(), {
         headers: { 'Cache-Control': 'no-cache' }
       });
       const data = await res.json();
@@ -78,7 +79,7 @@ export function ServiceManager() {
         const uploadFormData = new FormData();
         uploadFormData.append('file', selectedFile);
         
-        const uploadRes = await fetch('/api/media/upload', {
+        const uploadRes = await apiFetch('/api/media/upload', {
           method: 'POST',
           body: uploadFormData,
         });
@@ -106,13 +107,13 @@ export function ServiceManager() {
 
       let res: Response;
       if (editingService) {
-        res = await fetch(`/api/services/${editingService.id}`, {
+        res = await apiFetch(`/api/services/${editingService.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
       } else {
-        res = await fetch('/api/services', {
+        res = await apiFetch('/api/services', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -135,7 +136,7 @@ export function ServiceManager() {
 
   const handleToggleActive = async (service: Service) => {
     try {
-      await fetch(`/api/services/${service.id}`, {
+      await apiFetch(`/api/services/${service.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ active: service.active ? 0 : 1 }),
@@ -149,7 +150,7 @@ export function ServiceManager() {
   const handleDelete = async (service: Service) => {
     if (!confirm(`¿Desactivar servicio "${service.name}"?`)) return;
     try {
-      await fetch(`/api/services/${service.id}`, { method: 'DELETE' });
+      await apiFetch(`/api/services/${service.id}`, { method: 'DELETE' });
       await fetchServices();
     } catch (err) {
       alert('Error al eliminar');
