@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Booking } from '../shared';
+import { apiFetch } from '../api';
 
 type ViewMode = 'day' | 'week';
 
@@ -35,7 +36,7 @@ export function Agenda() {
         url = `/api/bookings?from=${selectedDate}&to=${endStr}`;
       }
 
-      const res = await fetch(url);
+      const res = await apiFetch(url);
       const data = await res.json();
       setBookings(data.bookings || []);
     } catch (err) {
@@ -51,7 +52,7 @@ export function Agenda() {
 
   const handleAction = async (bookingId: string, action: string) => {
     try {
-      const res = await fetch(`/api/bookings/${bookingId}/${action}`, { method: 'PUT' });
+      const res = await apiFetch(`/api/bookings/${bookingId}/${action}`, { method: 'PUT' });
       if (res.ok) {
         await fetchBookings();
       } else {

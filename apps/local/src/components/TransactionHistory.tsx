@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiFetch } from '../api';
 
 type FilterType = 'day' | 'week' | 'month';
 
@@ -38,7 +39,7 @@ export function TransactionHistory() {
 
   // Fetch available months
   useEffect(() => {
-    fetch('/api/history/months')
+    apiFetch('/api/history/months')
       .then(res => res.json())
       .then(data => {
         console.log('[History] Months response:', data);
@@ -76,9 +77,7 @@ export function TransactionHistory() {
     
     console.log('[History] Fetching URL:', url);
     
-    fetch(url)
-    
-    fetch(url)
+    apiFetch(url)
       .then(res => res.json())
       .then(data => {
         console.log('[History] Response:', data);

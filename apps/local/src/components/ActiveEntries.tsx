@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useAppStore } from '../store';
+import { apiFetch } from '../api';
 
 export function ActiveEntries() {
   const { 
@@ -44,7 +45,7 @@ export function ActiveEntries() {
   const handleExit = async (entryId: string) => {
     setProcessingId(entryId);
     try {
-      const res = await fetch(`/api/entries/fee-estimate/${entryId}`);
+      const res = await apiFetch(`/api/entries/fee-estimate/${entryId}`);
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || 'Error al obtener estimación');

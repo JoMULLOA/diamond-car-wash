@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { tryNormalizePatent, getPatentType, getPatentTypeDescription, type EntryWithVehicle } from '../shared';
 import { useAppStore } from '../store';
+import { apiFetch } from '../api';
 
 interface EntryFormProps {
   onSuccess: () => void;
@@ -27,7 +28,7 @@ export function EntryForm({ onSuccess }: EntryFormProps) {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/entries', {
+      const res = await apiFetch('/api/entries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ patent: normalized }),
