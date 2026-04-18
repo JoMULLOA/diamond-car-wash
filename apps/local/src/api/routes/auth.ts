@@ -70,7 +70,7 @@ router.get('/verify', async (c) => {
     }
 
     const token = authHeader.split(' ')[1];
-    await verify(token, JWT_SECRET);
+    await verify(token, JWT_SECRET, 'HS256');
     
     return c.json({ valid: true });
   } catch (_err) {
@@ -87,7 +87,7 @@ export const authMiddleware = async (c: any, next: any) => {
 
   const token = authHeader.split(' ')[1];
   try {
-    const payload = await verify(token, JWT_SECRET);
+    const payload = await verify(token, JWT_SECRET, 'HS256');
     if (payload.role !== 'admin') {
       return c.json({ error: 'Acceso denegado' }, 403);
     }
