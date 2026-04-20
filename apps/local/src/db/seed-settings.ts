@@ -69,5 +69,8 @@ export async function getMinParkingFee(): Promise<number> {
  */
 export async function getMaxCapacity(): Promise<number> {
   const value = await getSetting('max_capacity');
-  return value ? parseInt(value) : 50;
+  if (!value) return 50;
+  
+  const parsed = parseInt(value, 10);
+  return isNaN(parsed) || parsed < 0 ? 50 : parsed;
 }

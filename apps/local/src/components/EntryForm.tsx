@@ -27,6 +27,12 @@ export function EntryForm({ onSuccess }: EntryFormProps) {
       return;
     }
 
+    // Secondary safety check: ensure we don't submit if we know it's full
+    if (isFull) {
+      setError(`Capacidad máxima alcanzada (${stats?.active_entries || 0}/${maxCapacity}).`);
+      return;
+    }
+
     setLoading(true);
 
     try {

@@ -41,18 +41,17 @@ router.post('/', async (c) => {
     const db = getDatabase();
     const now = Date.now();
     
-    // Server-side Capacity Check
-    const activeEntriesCountRow = await db.get<{ count: number }>(
+    // Server-side Capacity Check - Ensuring strict comparison with explicit casting
+    const activeEntriesCountRow = await db.get<{ count: any }>(
       "SELECT COUNT(*) as count FROM entries WHERE status = 'active'"
     );
-    const activeEntriesCount = activeEntriesCountRow?.count || 0;
+    const activeEntriesCount = Number(activeEntriesCountRow?.count || 0);
     const maxCapacity = await getMaxCapacity();
 
     if (activeEntriesCount >= maxCapacity) {
-      console.warn(`[POST /entries] Registration blocked: Capacity reached (${activeEntriesCount}/${maxCapacity})`);
-      return c.json({ 
-        error: `Estacionamiento lleno (${activeEntriesCount}/${maxCapacity}). No se pueden registrar más ingresos.` 
-      }, 400);
+      const errorMsg = `Capacidad máxima alcanzada (${activeEntriesCount}/${maxCapacity}). Por favor, retire un vehículo antes de registrar uno nuevo.`;
+      console.warn(`[POST /entries] Registration blocked: ${errorMsg}`);
+      return c.json({ error: errorMsg }, 400);
     }
     
     // Check for existing active entry for this patent
