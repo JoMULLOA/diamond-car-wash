@@ -140,6 +140,7 @@ export const useSettingsStore = create<SettingsState>()(
     (set, get) => ({
       settings: {
         rate_per_minute: 5,
+        min_parking_fee: 100,
         business_name: 'Diamond Car Wash',
         business_address: '',
       },
@@ -283,6 +284,7 @@ export const useAppStore = create<AppStore>((set, get, api) => ({
   // Settings
   settings: {
     rate_per_minute: 5,
+    min_parking_fee: 100,
     business_name: 'Diamond Car Wash',
     business_address: '',
   },

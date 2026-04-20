@@ -20,6 +20,7 @@ router.get('/', async (c) => {
     return c.json({
       settings: {
         rate_per_minute: parseFloat(settings.rate_per_minute || String(DEFAULT_RATE_PER_MINUTE)),
+        min_parking_fee: parseFloat(settings.min_parking_fee || '100'),
         business_name: settings.business_name || 'Diamond Car Wash',
         business_address: settings.business_address || '',
         whatsapp_number: settings.whatsapp_number || '',
@@ -47,6 +48,14 @@ router.put('/', async (c) => {
         return c.json({ error: 'rate_per_minute must be a positive number' }, 400);
       }
       setSetting('rate_per_minute', String(rate));
+    }
+
+    if (updates.min_parking_fee !== undefined) {
+      const minFee = parseFloat(updates.min_parking_fee);
+      if (isNaN(minFee) || minFee < 0) {
+        return c.json({ error: 'min_parking_fee must be a positive number' }, 400);
+      }
+      setSetting('min_parking_fee', String(minFee));
     }
     
     if (updates.business_name !== undefined) {

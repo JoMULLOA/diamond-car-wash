@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { getDatabase } from '../../db/index';
-import { getRatePerMinute } from '../../db/seed-settings';
+import { getRatePerMinute, getMinParkingFee } from '../../db/seed-settings';
 import { normalizePatent } from '../../constants';
 import { v4 as uuid } from 'uuid';
 import type { Entry, Vehicle, EntryWithVehicle, ExitResult } from '../../constants';
@@ -149,15 +149,18 @@ router.get('/fee-estimate/:id', async (c) => {
     const totalMs = now - entry.entry_time;
     const totalMinutes = Math.max(1, Math.ceil(totalMs / 60000));
     
-    // Get rate
+    // Get rate and minimum fee
     const ratePerMinute = await getRatePerMinute();
+    const minParkingFee = await getMinParkingFee();
     
-    // Calculate amount
+    // Calculate amount — only for non-subscription vehicles
     let amount = 0;
     const isSubscription = entry.vehicle_type === 'subscription';
     
     if (!isSubscription) {
-      amount = totalMinutes * ratePerMinute;
+      const calculated = totalMinutes * ratePerMinute;
+      // Apply minimum fee: charge whichever is greater
+      amount = Math.max(calculated, minParkingFee);
     }
     
     const result: ExitResult = {

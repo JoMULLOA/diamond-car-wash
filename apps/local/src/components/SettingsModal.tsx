@@ -11,6 +11,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
 
   const [formData, setFormData] = useState<Settings>({
     rate_per_minute: 5,
+    min_parking_fee: 100,
     business_name: 'Diamond Car Wash',
     business_address: '',
     whatsapp_number: '',
@@ -18,8 +19,9 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     facebook_url: '',
   });
 
-  // Local state for the rate input to allow smooth typing
+  // Local state for numeric inputs to allow smooth typing
   const [rateInput, setRateInput] = useState<string>(formData.rate_per_minute.toString());
+  const [minFeeInput, setMinFeeInput] = useState<string>(formData.min_parking_fee.toString());
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -32,6 +34,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     if (settings) {
       setFormData(settings);
       setRateInput(settings.rate_per_minute.toString());
+      setMinFeeInput((settings.min_parking_fee ?? 100).toString());
     }
   }, [settings]);
 
@@ -156,27 +159,61 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm text-gray-400 uppercase tracking-wider mb-2">
-                Tarifa por Minuto (CLP)
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={rateInput}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === '' || /^\d+$/.test(value)) {
-                      setRateInput(value);
-                      const parsed = parseInt(value);
-                      setFormData({ ...formData, rate_per_minute: !isNaN(parsed) ? parsed : 0 });
-                    }
-                  }}
-                  className="input flex-1"
-                  placeholder="Ej: 500"
-                />
-                <span className="text-gray-500 uppercase tracking-wider text-xs">CLP/min</span>
+            <div className="pt-4 border-t border-gray-800">
+              <h3 className="text-sm text-yellow-500 uppercase tracking-widest mb-4 font-serif">
+                Tarifas de Estacionamiento
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-gray-400 uppercase tracking-wider mb-2">
+                    Tarifa por Minuto (CLP)
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={rateInput}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '' || /^\d+$/.test(value)) {
+                          setRateInput(value);
+                          const parsed = parseInt(value);
+                          setFormData({ ...formData, rate_per_minute: !isNaN(parsed) ? parsed : 0 });
+                        }
+                      }}
+                      className="input flex-1"
+                      placeholder="Ej: 5"
+                    />
+                    <span className="text-gray-500 uppercase tracking-wider text-xs">CLP/min</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-400 uppercase tracking-wider mb-2">
+                    Cobro Mínimo de Estacionamiento (CLP)
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={minFeeInput}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '' || /^\d+$/.test(value)) {
+                          setMinFeeInput(value);
+                          const parsed = parseInt(value);
+                          setFormData({ ...formData, min_parking_fee: !isNaN(parsed) ? parsed : 0 });
+                        }
+                      }}
+                      className="input flex-1"
+                      placeholder="Ej: 100"
+                    />
+                    <span className="text-gray-500 uppercase tracking-wider text-xs">CLP</span>
+                  </div>
+                  <p className="text-[10px] text-gray-600 mt-2 uppercase tracking-tighter">
+                    Se cobra este monto si el cálculo por tiempo resulta menor. Solo aplica a estacionamientos sin membresía.
+                  </p>
+                </div>
               </div>
             </div>
 

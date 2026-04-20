@@ -59,8 +59,8 @@ body {
   content: '';
   position: fixed;
   inset: 0;
-  /* Deep radial gradient to focus center while darkening corners for ultimate premium feel */
-  background: radial-gradient(circle at center, rgba(10, 10, 10, 0.88) 0%, rgba(5, 5, 5, 0.98) 100%);
+  /* Deeply darkened — cards pop, background is atmospheric */
+  background: radial-gradient(circle at center, rgba(8, 8, 8, 0.95) 0%, rgba(3, 3, 3, 0.99) 100%);
   z-index: -1;
   pointer-events: none;
 }
