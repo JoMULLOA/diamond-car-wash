@@ -161,10 +161,11 @@ router.get('/fee-estimate/:id', async (c) => {
     if (isSubscription) {
       // Specifically check if the membership is for parking
       const membership = await db.get<{ id: string; type: string }>(
-        'SELECT id, type FROM monthly_memberships WHERE patent = ? AND status = "active"',
+        "SELECT id, type FROM monthly_memberships WHERE patent = ? AND status = 'active'",
         [entry.patent]
       );
-      if (membership?.type === 'parking') {
+      
+      if (membership && membership.type === 'parking') {
         const currentDate = new Date();
         const currentMonth = currentDate.getMonth() + 1;
         const currentYear = currentDate.getFullYear();
