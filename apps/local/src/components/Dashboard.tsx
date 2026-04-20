@@ -18,10 +18,10 @@ export function Dashboard() {
         apiFetch('/api/dashboard/stats'),
         apiFetch('/api/entries/history?limit=3')
       ]);
-      
+
       const statsData = await statsRes.json();
       const historyData = await historyRes.json();
-      
+
       setStats(statsData.stats || null);
       setRecentEntries(historyData.entries || []);
       setLastUpdate(new Date());
@@ -91,16 +91,16 @@ export function Dashboard() {
             <div className="stat-card group">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-gray-500 text-sm uppercase tracking-wider mb-1">En Playa</p>
-                  <p className="text-4xl font-bold text-white group-hover:text-yellow-500 transition-colors">
+                  <p className="text-gray-500 text-sm uppercase tracking-wider mb-1">Estacionados</p>
+                  <p className="text-3xl sm:text-4xl font-bold text-white group-hover:text-yellow-500 transition-colors">
                     {stats?.active_entries ?? 0}
                   </p>
                 </div>
-                <div className="text-4xl opacity-20 group-hover:opacity-40 transition-opacity">🚗</div>
+                <div className="text-3xl sm:text-4xl opacity-20 group-hover:opacity-40 transition-opacity">🚗</div>
               </div>
               <div className="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
-                <div 
-                  className="bg-yellow-500 h-full transition-all duration-1000" 
+                <div
+                  className="bg-yellow-500 h-full transition-all duration-1000"
                   style={{ width: `${Math.min(((stats?.active_entries ?? 0) / 50) * 100, 100)}%` }}
                 ></div>
               </div>
@@ -111,11 +111,11 @@ export function Dashboard() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-gray-500 text-sm uppercase tracking-wider mb-1">Transacciones</p>
-                  <p className="text-4xl font-bold text-white group-hover:text-yellow-500 transition-colors">
+                  <p className="text-3xl sm:text-4xl font-bold text-white group-hover:text-yellow-500 transition-colors">
                     {stats?.total_today ?? 0}
                   </p>
                 </div>
-                <div className="text-4xl opacity-20 group-hover:opacity-40 transition-opacity">📋</div>
+                <div className="text-3xl sm:text-4xl opacity-20 group-hover:opacity-40 transition-opacity">📋</div>
               </div>
               <p className="text-gray-600 text-xs uppercase tracking-[0.2em]">Acumulado Hoy</p>
             </div>
@@ -125,11 +125,11 @@ export function Dashboard() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-gray-500 text-sm uppercase tracking-wider mb-1">Recaudación</p>
-                  <p className="text-2xl font-bold text-yellow-500 group-hover:text-yellow-400 transition-colors">
+                  <p className="text-2xl sm:text-3xl font-bold text-yellow-500 group-hover:text-yellow-400 transition-colors">
                     {formatCurrency(stats?.revenue_today ?? 0)}
                   </p>
                 </div>
-                <div className="text-4xl opacity-20 group-hover:opacity-40 transition-opacity">💰</div>
+                <div className="text-3xl sm:text-4xl opacity-20 group-hover:opacity-40 transition-opacity">💰</div>
               </div>
               <p className="text-gray-600 text-xs uppercase tracking-[0.2em]">Total Diario (CLP)</p>
             </div>
@@ -156,13 +156,13 @@ export function Dashboard() {
                   stroke="currentColor"
                   strokeWidth="8"
                   strokeDasharray={364.4}
-                  strokeDashoffset={364.4 - (364.4 * Math.min((stats?.active_entries ?? 0) / 50, 1)) }
+                  strokeDashoffset={364.4 - (364.4 * Math.min((stats?.active_entries ?? 0) / 50, 1))}
                   className="text-yellow-500 transition-all duration-1000"
                   strokeLinecap="round"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-bold text-white leading-none">{Math.round(((stats?.active_entries ?? 0) / 50) * 100)}%</span>
+                <span className="text-xl sm:text-2xl font-bold text-white leading-none">{Math.round(((stats?.active_entries ?? 0) / 50) * 100)}%</span>
                 <span className="text-[10px] text-gray-500 uppercase tracking-tighter mt-1">Ocupación</span>
               </div>
             </div>
@@ -191,8 +191,8 @@ export function Dashboard() {
                   }}
                   className={`
                     flex flex-col items-center justify-center gap-3 py-6 rounded-xl transition-all duration-300 group/btn
-                    ${action.premium 
-                      ? 'bg-gradient-to-br from-yellow-500 to-yellow-600 text-black border-yellow-400 shadow-[0_0_20px_rgba(212,175,55,0.2)]' 
+                    ${action.premium
+                      ? 'bg-gradient-to-br from-yellow-500 to-yellow-600 text-black border-yellow-400 shadow-[0_0_20px_rgba(212,175,55,0.2)]'
                       : 'bg-gray-900/50 border border-gray-800 text-yellow-500/80 hover:border-yellow-500/50'
                     }
                   `}
@@ -229,7 +229,7 @@ export function Dashboard() {
                 ))
               )}
             </div>
-            <button 
+            <button
               onClick={() => window.dispatchEvent(new CustomEvent('tab-change', { detail: 'history' }))}
               className="mt-6 text-[10px] uppercase tracking-[0.2em] text-gray-500 hover:text-yellow-500 transition-colors text-center font-bold"
             >
@@ -246,13 +246,13 @@ export function Dashboard() {
               <span className="text-gray-300 font-medium tracking-wide">Sincronización</span>
             </div>
             <span className="text-gray-500 text-sm">
-              {stats?.last_sync 
-                ? new Date(stats.last_sync).toLocaleString('es-AR', { 
-                    day: '2-digit', 
-                    month: '2-digit',
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })
+              {stats?.last_sync
+                ? new Date(stats.last_sync).toLocaleString('es-AR', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
                 : 'Nunca'
               }
             </span>

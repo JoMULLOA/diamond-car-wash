@@ -183,49 +183,49 @@ export function ActiveEntries() {
                 key={entry.id}
                 className="flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-xl border border-gray-800 bg-gray-900/40 hover:border-yellow-500/30 transition-all group"
               >
-                <div className="flex items-center gap-5 mb-4 sm:mb-0">
-                  <div className="w-14 h-14 rounded-lg bg-gray-800/50 flex items-center justify-center border border-gray-700 group-hover:border-yellow-500/20 transition-colors">
-                    <span className="text-2xl">🚗</span>
+                <div className="flex items-center gap-4 sm:gap-5 mb-4 sm:mb-0 w-full sm:w-auto overflow-hidden">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-lg bg-gray-800/50 flex items-center justify-center border border-gray-700 group-hover:border-yellow-500/20 transition-colors">
+                    <span className="text-xl sm:text-2xl">🚗</span>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl sm:text-2xl font-mono font-bold text-white tracking-[0.15em]">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-lg sm:text-2xl font-mono font-bold text-white tracking-[0.1em] sm:tracking-[0.15em] break-all">
                         {entry.patent}
                       </span>
                       {entry.vehicle_type === 'subscription' && (
-                        <span className="px-2 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded uppercase tracking-wider font-bold">
-                          Suscriptor
+                        <span className="px-2 py-0.5 text-[10px] bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded uppercase tracking-wider font-bold whitespace-nowrap">
+                          Socio
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 mt-1 uppercase tracking-widest font-medium">
+                    <p className="text-xs text-gray-500 mt-1 uppercase tracking-widest font-medium truncate">
                       Ingreso: <span className="text-gray-400 font-bold">{formatTime(entry.entry_time)}</span>
                     </p>
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-between sm:justify-end gap-8 border-t sm:border-t-0 border-gray-800 pt-4 sm:pt-0">
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-yellow-500 tabular-nums">
+                <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-8 border-t sm:border-t-0 border-gray-800 pt-4 sm:pt-0 w-full sm:w-auto">
+                  <div className="text-left sm:text-right shrink-0">
+                    <p className="text-xl sm:text-2xl font-bold text-yellow-500 tabular-nums leading-none">
                       {entry.elapsed_minutes || 0}
                     </p>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-bold">minutos</p>
+                    <p className="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-[0.2em] font-bold mt-1">min<span className="hidden sm:inline">utos</span></p>
                   </div>
                   
                   <button
                     onClick={() => handleExit(entry.id)}
                     disabled={processingId === entry.id}
-                    className="btn-primary py-3 px-6 text-sm flex items-center gap-2 group/btn"
+                    className="btn-primary py-2 px-4 sm:py-3 sm:px-6 text-xs sm:text-sm flex items-center gap-2 group/btn whitespace-nowrap shrink-0"
                   >
                     {processingId === entry.id ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
+                        <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
                         <span>...</span>
                       </>
                     ) : (
                       <>
                         <span className="hidden sm:inline">PROCESAR</span> SALIDA
-                        <span className="group-hover/btn:translate-x-1 transition-transform">→</span>
+                        <span className="hidden sm:inline group-hover/btn:translate-x-1 transition-transform">→</span>
                       </>
                     )}
                   </button>

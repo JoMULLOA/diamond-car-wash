@@ -358,9 +358,9 @@ export function ServiceManager() {
                     : 'border-gray-800/50 bg-gray-900/10 opacity-50'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded overflow-hidden flex items-center justify-center bg-black ${
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 w-full sm:w-auto">
+                    <div className={`w-12 h-12 shrink-0 rounded overflow-hidden flex items-center justify-center bg-black ${
                       service.active ? 'border border-yellow-500/30' : 'bg-gray-800'
                     }`}>
                       {service.media_url ? (
@@ -373,11 +373,11 @@ export function ServiceManager() {
                         <span className="text-lg">🚿</span>
                       )}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-white">{service.name}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-base sm:text-lg font-bold text-white truncate">{service.name}</span>
                         {!service.active && (
-                          <span className="px-2 py-0.5 text-xs bg-gray-700 text-gray-400 rounded uppercase">
+                          <span className="px-2 py-0.5 text-[10px] sm:text-xs bg-gray-700 text-gray-400 rounded uppercase whitespace-nowrap">
                             Inactivo
                           </span>
                         )}
@@ -385,39 +385,50 @@ export function ServiceManager() {
                       {service.description && (
                         <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{service.description}</p>
                       )}
-                      <p className="text-xs text-gray-500 mt-1">
-                        {service.duration_minutes} min · {formatCurrency(service.price)} · <span className="text-yellow-600">máx {service.max_quantity ?? 1} u.</span>
+                      <p className="text-[10px] sm:text-xs text-gray-500 mt-1 flex flex-wrap gap-x-1">
+                        <span>{service.duration_minutes} min</span>
+                        <span>·</span>
+                        <span>{formatCurrency(service.price)}</span>
+                        <span>·</span>
+                        <span className="text-yellow-600">máx {service.max_quantity ?? 1} u.</span>
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  
+                  <div className="flex items-center justify-end gap-2 border-t sm:border-t-0 border-gray-800/50 pt-3 sm:pt-0">
                     {(service.description || service.process || service.tools_used) && (
                       <button
                         onClick={() => setExpandedServiceId(expandedServiceId === service.id ? null : service.id)}
-                        className={`px-3 py-1.5 text-xs rounded border transition-colors ${
+                        className={`px-3 py-2 sm:py-1.5 text-xs rounded border transition-colors flex items-center gap-1.5 ${
                           expandedServiceId === service.id 
                             ? 'border-yellow-500 text-yellow-500 bg-yellow-500/10'
                             : 'border-gray-700 text-gray-400 hover:text-white hover:border-yellow-500/50'
                         }`}
+                        title={expandedServiceId === service.id ? 'Ocultar Detalles' : 'Ver Detalles'}
                       >
-                        {expandedServiceId === service.id ? 'Ocultar Detalles' : 'Ver Detalles'}
+                        <span className="text-sm">{expandedServiceId === service.id ? '⬆️' : '👁️'}</span>
+                        <span className="hidden sm:inline">{expandedServiceId === service.id ? 'Ocultar' : 'Detalles'}</span>
                       </button>
                     )}
                     <button
                       onClick={() => handleToggleActive(service)}
-                      className={`px-3 py-1.5 text-xs rounded border transition-colors ${
+                      className={`px-3 py-2 sm:py-1.5 text-xs rounded border transition-colors flex items-center gap-1.5 ${
                         service.active 
                           ? 'border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10'
                           : 'border-green-500/30 text-green-500 hover:bg-green-500/10'
                       }`}
+                      title={service.active ? 'Desactivar' : 'Activar'}
                     >
-                      {service.active ? 'Desactivar' : 'Activar'}
+                      <span className="text-sm">{service.active ? '⏸️' : '▶️'}</span>
+                      <span className="hidden sm:inline">{service.active ? 'Desactivar' : 'Activar'}</span>
                     </button>
                     <button
                       onClick={() => handleEdit(service)}
-                      className="px-3 py-1.5 text-xs rounded border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors"
+                      className="px-3 py-2 sm:py-1.5 text-xs rounded border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors flex items-center gap-1.5"
+                      title="Editar"
                     >
-                      Editar
+                      <span className="text-sm">✏️</span>
+                      <span className="hidden sm:inline">Editar</span>
                     </button>
                   </div>
                 </div>

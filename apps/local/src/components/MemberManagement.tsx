@@ -363,90 +363,88 @@ export function MemberManagement() {
 
       {error && <div className="text-red-500 bg-red-900/20 p-3 rounded">{error}</div>}
 
-      <div className="bg-[#0a0a0a] rounded-lg border border-[#d4af37]/20 overflow-hidden shadow-lg">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-[#141414] border-b border-[#d4af37]/10 text-gray-400 text-sm">
-              <th className="p-4 font-medium uppercase tracking-wider">Patente</th>
-              <th className="p-4 font-medium uppercase tracking-wider">Cliente</th>
-              <th className="p-4 font-medium uppercase tracking-wider">Plan</th>
-              <th className="p-4 font-medium uppercase tracking-wider text-center">Estado</th>
-              <th className="p-4 font-medium uppercase tracking-wider text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#d4af37]/5">
-            {filtered.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="p-8 text-center text-gray-500">
-                  No hay socios registrados.
-                </td>
-              </tr>
-            ) : (
-              filtered.map((m) => (
-                <tr key={m.id} className="hover:bg-[#141414]/50 transition-colors">
-                  <td className="p-4">
-                    <span className="bg-[#141414] border border-[#d4af37]/20 text-gray-200 font-mono text-sm px-2 py-1 rounded tracking-widest">
-                      {m.patent}
+      <div className="space-y-4">
+        {filtered.length === 0 ? (
+          <div className="bg-[#0a0a0a] rounded-lg border border-[#d4af37]/20 p-8 text-center text-gray-500">
+            No hay socios registrados.
+          </div>
+        ) : (
+          filtered.map((m) => (
+            <div key={m.id} className="bg-[#0a0a0a] rounded-lg border border-[#d4af37]/20 overflow-hidden shadow-lg hover:border-[#d4af37]/40 transition-all p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:items-center justify-between group">
+              
+              {/* Left: Patent and Basic Info */}
+              <div className="flex flex-col gap-3 sm:w-1/3">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="bg-[#141414] border border-[#d4af37]/30 text-gray-200 font-mono text-sm sm:text-base px-3 py-1 rounded tracking-widest shadow-[0_0_10px_rgba(212,175,55,0.1)]">
+                    {m.patent}
+                  </span>
+                  {m.type === 'wash' ? (
+                    <span className="inline-flex items-center gap-1 bg-blue-900/30 text-blue-400 border border-blue-800/50 px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium uppercase tracking-wider">
+                      🧼 Lavado
                     </span>
-                  </td>
-                  <td className="p-4">
-                    <div className="text-gray-200 font-medium">{m.owner_name}</div>
-                    <div className="text-gray-500 text-xs">{m.owner_phone}</div>
-                  </td>
-                  <td className="p-4">
-                    {m.type === 'wash' ? (
-                      <div>
-                        <span className="inline-flex items-center gap-1 bg-blue-900/30 text-blue-400 border border-blue-800/50 px-2 py-1 rounded-full text-xs font-medium uppercase tracking-wider">
-                          🧼 Lavado
-                        </span>
-                        {m.service_names && (
-                          <p className="text-gray-500 text-xs mt-1 max-w-[200px] truncate" title={m.service_names}>
-                            {m.service_names}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className={`text-xs font-bold ${m.washes_remaining > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {m.washes_remaining}/4
-                          </span>
-                          <span className="text-gray-600 text-xs">lavados</span>
-                          <span className="text-gray-600 text-xs">·</span>
-                          <span className="text-gray-500 text-xs">{m.total_duration}min</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 bg-purple-900/30 text-purple-400 border border-purple-800/50 px-2 py-1 rounded-full text-xs font-medium uppercase tracking-wider">
-                        🅿️ Parking
-                      </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 bg-purple-900/30 text-purple-400 border border-purple-800/50 px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium uppercase tracking-wider">
+                      🅿️ Parking
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <div className="text-gray-200 font-bold text-sm sm:text-base">{m.owner_name}</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">{m.owner_phone}</div>
+                </div>
+              </div>
+
+              {/* Center: Details (Conditional) */}
+              <div className="border-t sm:border-t-0 border-gray-800 pt-3 sm:pt-0 sm:flex-1">
+                {m.type === 'wash' && (
+                  <div className="flex flex-col sm:items-center">
+                    {m.service_names && (
+                      <p className="text-gray-400 text-xs sm:text-sm max-w-full sm:max-w-[200px] truncate mb-1" title={m.service_names}>
+                        {m.service_names}
+                      </p>
                     )}
-                  </td>
-                  <td className="p-4 text-center">
-                    {m.is_current_month_paid ? (
-                      <span className="inline-block bg-green-900/30 text-green-400 border border-green-800/50 px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wider shadow-[0_0_10px_rgba(34,197,94,0.1)]">
-                        Al Día
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs sm:text-sm font-bold ${m.washes_remaining > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {m.washes_remaining}/4
                       </span>
-                    ) : (
-                      <span className="inline-block bg-red-900/30 text-red-500 border border-red-800/50 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(239,68,68,0.2)] animate-pulse">
-                        Pendiente
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-4 text-right">
-                    {!m.is_current_month_paid ? (
-                      <button
-                        onClick={() => handlePayMonth(m)}
-                        className="text-yellow-500 hover:text-yellow-400 text-sm font-medium transition-colors border border-yellow-500/30 hover:border-yellow-400 px-3 py-1 rounded bg-yellow-500/5"
-                      >
-                        {m.type === 'wash' ? `Cobrar ${formatCurrency(m.monthly_price)}` : 'Registrar Pago'}
-                      </button>
-                    ) : (
-                      <span className="text-gray-600 text-sm">Mes Pagado</span>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                      <span className="text-gray-600 text-[10px] sm:text-xs uppercase tracking-wider">lavados</span>
+                      <span className="text-gray-600 text-xs">·</span>
+                      <span className="text-gray-500 text-[10px] sm:text-xs uppercase tracking-wider">{m.total_duration} min</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right: Status and Action */}
+              <div className="flex items-center justify-between sm:flex-col sm:items-end gap-3 border-t sm:border-t-0 border-gray-800 pt-3 sm:pt-0 sm:w-1/4">
+                <div>
+                  {m.is_current_month_paid ? (
+                    <span className="inline-block bg-green-900/30 text-green-400 border border-green-800/50 px-3 py-1 rounded-full text-[10px] sm:text-xs font-medium uppercase tracking-wider shadow-[0_0_10px_rgba(34,197,94,0.1)]">
+                      Al Día
+                    </span>
+                  ) : (
+                    <span className="inline-block bg-red-900/30 text-red-500 border border-red-800/50 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(239,68,68,0.2)] animate-pulse">
+                      Pendiente
+                    </span>
+                  )}
+                </div>
+                <div>
+                  {!m.is_current_month_paid ? (
+                    <button
+                      onClick={() => handlePayMonth(m)}
+                      className="text-yellow-500 hover:text-yellow-400 text-xs sm:text-sm font-bold transition-all border border-yellow-500/50 hover:border-yellow-400 px-4 py-2 rounded bg-yellow-500/10 hover:bg-yellow-500/20 shadow-[0_0_15px_rgba(212,175,55,0.15)] whitespace-nowrap"
+                    >
+                      {m.type === 'wash' ? `Cobrar ${formatCurrency(m.monthly_price)}` : 'Registrar Pago'}
+                    </button>
+                  ) : (
+                    <span className="text-gray-600 text-[10px] sm:text-xs uppercase tracking-widest font-bold">Mes Pagado</span>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
