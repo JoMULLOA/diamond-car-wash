@@ -4,7 +4,8 @@
     "DATABASE_URL",
     "DATABASE_AUTH_TOKEN",
     "BLOB_READ_WRITE_TOKEN",
-    "NEXT_PUBLIC_SITE_URL"
+    "NEXT_PUBLIC_SITE_URL",
+    "JWT_SECRET"
   ],
   "tasks": {
     "build": {
@@ -14,7 +15,8 @@
         "DATABASE_URL",
         "DATABASE_AUTH_TOKEN",
         "BLOB_READ_WRITE_TOKEN",
-        "NEXT_PUBLIC_SITE_URL"
+        "NEXT_PUBLIC_SITE_URL",
+        "JWT_SECRET"
       ]
     },
     "dev": {

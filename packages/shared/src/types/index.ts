@@ -62,6 +62,7 @@ export interface SubscriptionCache {
 // Settings
 export interface Settings {
   rate_per_minute: number;
+  min_parking_fee: number;
   business_name: string;
   business_address: string;
 }
