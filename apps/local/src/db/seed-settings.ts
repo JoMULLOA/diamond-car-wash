@@ -18,6 +18,7 @@ export async function seedSettings(): Promise<void> {
     { key: 'whatsapp_number', value: '56940889752' },
     { key: 'instagram_url', value: 'https://www.instagram.com/diamondcarwash.arauco/' },
     { key: 'facebook_url', value: 'https://www.facebook.com/people/DiamondcarwuashArauco/100064216656842/' },
+    { key: 'max_capacity', value: '50' },
   ];
 
   for (const setting of defaults) {
@@ -57,11 +58,16 @@ export async function getRatePerMinute(): Promise<number> {
 
 /**
  * Get minimum parking fee
- * Applied only to non-subscription vehicles.
- * If the calculated fee (minutes * rate) is less than this value,
- * this minimum is charged instead.
  */
 export async function getMinParkingFee(): Promise<number> {
   const value = await getSetting('min_parking_fee');
   return value ? parseFloat(value) : DEFAULT_MIN_PARKING_FEE;
+}
+
+/**
+ * Get maximum parking capacity
+ */
+export async function getMaxCapacity(): Promise<number> {
+  const value = await getSetting('max_capacity');
+  return value ? parseInt(value) : 50;
 }

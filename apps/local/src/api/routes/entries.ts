@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { getDatabase } from '../../db/index';
-import { getRatePerMinute, getMinParkingFee } from '../../db/seed-settings';
+import { getRatePerMinute, getMinParkingFee, getMaxCapacity } from '../../db/seed-settings';
 import { normalizePatent } from '../../constants';
 import { v4 as uuid } from 'uuid';
 import type { Entry, Vehicle, EntryWithVehicle, ExitResult } from '../../constants';
@@ -40,6 +40,20 @@ router.post('/', async (c) => {
     
     const db = getDatabase();
     const now = Date.now();
+    
+    // Server-side Capacity Check
+    const activeEntriesCountRow = await db.get<{ count: number }>(
+      "SELECT COUNT(*) as count FROM entries WHERE status = 'active'"
+    );
+    const activeEntriesCount = activeEntriesCountRow?.count || 0;
+    const maxCapacity = await getMaxCapacity();
+
+    if (activeEntriesCount >= maxCapacity) {
+      console.warn(`[POST /entries] Registration blocked: Capacity reached (${activeEntriesCount}/${maxCapacity})`);
+      return c.json({ 
+        error: `Estacionamiento lleno (${activeEntriesCount}/${maxCapacity}). No se pueden registrar más ingresos.` 
+      }, 400);
+    }
     
     // Check for existing active entry for this patent
     const existing = await db.get<EntryWithVehicle>(

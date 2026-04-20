@@ -1,11 +1,12 @@
 import { Hono } from 'hono';
 import { getDatabase } from '../../db/index';
 import { normalizePatent } from '../../constants';
+import { authMiddleware } from './auth';
 import type { SubscriptionCache } from '../../constants';
 
 const router = new Hono();
 
-// GET /subscriptions/check/:patent - Check if patent has active subscription
+// GET /subscriptions/check/:patent - Check if patent has active subscription (Public)
 router.get('/check/:patent', async (c) => {
   try {
     const patent = c.req.param('patent');
@@ -48,8 +49,8 @@ router.get('/check/:patent', async (c) => {
   }
 });
 
-// GET /subscriptions - List all subscriptions
-router.get('/', async (c) => {
+// GET /subscriptions - List all subscriptions (Protected)
+router.get('/', authMiddleware, async (c) => {
   try {
     const db = getDatabase();
     const now = Date.now();
@@ -74,8 +75,8 @@ router.get('/', async (c) => {
   }
 });
 
-// DELETE /subscriptions/:id - Remove a subscription from cache
-router.delete('/:id', async (c) => {
+// DELETE /subscriptions/:id - Remove a subscription from cache (Protected)
+router.delete('/:id', authMiddleware, async (c) => {
   try {
     const id = c.req.param('id');
     const db = getDatabase();

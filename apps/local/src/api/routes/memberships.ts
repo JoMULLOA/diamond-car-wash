@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { getDatabase } from '../../db/index';
 import { normalizePatent } from '../../constants';
 import { v4 as uuid } from 'uuid';
+import { authMiddleware } from './auth';
 import type { MonthlyMembership, MonthlyPayment, Service } from '../../shared';
 
 const router = new Hono();
@@ -29,7 +30,7 @@ async function getMembershipServices(db: ReturnType<typeof getDatabase>, members
 }
 
 // GET /memberships - List all memberships with services and payment status
-router.get('/', async (c) => {
+router.get('/', authMiddleware, async (c) => {
   try {
     const db = getDatabase();
     const typeFilter = c.req.query('type');
@@ -81,7 +82,7 @@ router.get('/', async (c) => {
 });
 
 // POST /memberships - Create or update a membership
-router.post('/', async (c) => {
+router.post('/', authMiddleware, async (c) => {
   try {
     const body = await c.req.json();
     const { patent, owner_name, owner_phone, type, service_ids } = body;

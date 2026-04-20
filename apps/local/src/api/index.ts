@@ -64,12 +64,13 @@ app.route('/api/auth', authRouter);
 
 // Protect sensitive routers globally
 app.use('/api/entries/*', authMiddleware);
-app.use('/api/subscriptions/*', authMiddleware);
-app.use('/api/memberships/*', authMiddleware);
 app.use('/api/settings/*', authMiddleware);
 app.use('/api/dashboard/*', authMiddleware);
 app.use('/api/history/*', authMiddleware);
 app.use('/api/sync/*', authMiddleware);
+
+// Note: Memberships, Subscriptions, Services and Bookings 
+// manage their own protection to allow public routes.
 
 // Mount routers
 app.route('/api/entries', entriesRouter);
