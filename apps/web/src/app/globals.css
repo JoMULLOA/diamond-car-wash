@@ -48,21 +48,14 @@ body {
 /* Fondo con imagen solo para el portal administrativo */
 .admin-portal-wrapper {
   min-height: 100vh;
-  background-image: url('/bg-nimda-premium.png');
+  /* Multi-layer background: Darkening radial overlay on top of the premium image */
+  background: 
+    radial-gradient(circle at center, rgba(8, 8, 8, 0.94) 0%, rgba(3, 3, 3, 0.98) 100%),
+    url('/bg-nimda-premium.png');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   position: relative;
-}
-
-.admin-portal-wrapper::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  /* Deeply darkened — cards pop, background is atmospheric */
-  background: radial-gradient(circle at center, rgba(8, 8, 8, 0.95) 0%, rgba(3, 3, 3, 0.99) 100%);
-  z-index: -1;
-  pointer-events: none;
 }
 
 /* Smoke texture overlay */

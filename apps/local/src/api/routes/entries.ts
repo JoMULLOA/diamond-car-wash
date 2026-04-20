@@ -153,11 +153,23 @@ router.get('/fee-estimate/:id', async (c) => {
     const ratePerMinute = await getRatePerMinute();
     const minParkingFee = await getMinParkingFee();
     
-    // Calculate amount — only for non-subscription vehicles
+    // Calculate amount
     let amount = 0;
+    let isExemptFromParking = false;
     const isSubscription = entry.vehicle_type === 'subscription';
     
-    if (!isSubscription) {
+    if (isSubscription) {
+      // Specifically check if the membership is for parking
+      const membership = await db.get<{ type: string }>(
+        'SELECT type FROM monthly_memberships WHERE patent = ? AND status = "active"',
+        [entry.patent]
+      );
+      if (membership?.type === 'parking') {
+        isExemptFromParking = true;
+      }
+    }
+    
+    if (!isExemptFromParking) {
       const calculated = totalMinutes * ratePerMinute;
       // Apply minimum fee: charge whichever is greater
       amount = Math.max(calculated, minParkingFee);
