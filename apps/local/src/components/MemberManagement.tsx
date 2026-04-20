@@ -39,6 +39,7 @@ export function MemberManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tabFilter, setTabFilter] = useState<TabFilter>('all');
+  const [patentFilter, setPatentFilter] = useState('');
   
   const [isAdding, setIsAdding] = useState(false);
   const [newPatent, setNewPatent] = useState('');
@@ -169,9 +170,11 @@ export function MemberManagement() {
     }
   };
 
-  const filtered = tabFilter === 'all' 
-    ? memberships 
-    : memberships.filter(m => m.type === tabFilter);
+  const filtered = memberships.filter(m => {
+    const matchTab = tabFilter === 'all' || m.type === tabFilter;
+    const matchPatent = m.patent.toLowerCase().includes(patentFilter.toLowerCase());
+    return matchTab && matchPatent;
+  });
 
   if (loading) return <div className="text-gray-400">Cargando mensualidades...</div>;
 
@@ -192,25 +195,46 @@ export function MemberManagement() {
         </button>
       </div>
 
-      {/* Tab Filters */}
-      <div className="flex gap-2">
-        {([
-          { key: 'all' as TabFilter, label: 'Todos', icon: '📋' },
-          { key: 'parking' as TabFilter, label: 'Estacionamiento', icon: '🅿️' },
-          { key: 'wash' as TabFilter, label: 'Club de Lavado', icon: '🧼' },
-        ]).map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => setTabFilter(tab.key)}
-            className={`px-4 py-2 text-sm rounded border transition-colors ${
-              tabFilter === tab.key
-                ? 'border-yellow-500 text-yellow-500 bg-yellow-500/10'
-                : 'border-gray-700 text-gray-400 hover:text-white'
-            }`}
-          >
-            {tab.icon} {tab.label}
-          </button>
-        ))}
+      {/* Filters and Search */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex gap-2 border border-gray-800 rounded-lg p-1 bg-[#0a0a0a] overflow-x-auto">
+          {([
+            { key: 'all' as TabFilter, label: 'Todos', icon: '📋' },
+            { key: 'parking' as TabFilter, label: 'Estacionamiento', icon: '🅿️' },
+            { key: 'wash' as TabFilter, label: 'Club de Lavado', icon: '🧼' },
+          ]).map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setTabFilter(tab.key)}
+              className={`px-4 py-2 text-sm rounded transition-colors whitespace-nowrap ${
+                tabFilter === tab.key
+                  ? 'bg-yellow-500/10 text-yellow-500'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
+              }`}
+            >
+              {tab.icon} {tab.label}
+            </button>
+          ))}
+        </div>
+        
+        <div className="relative flex-1">
+          <input
+            type="text"
+            placeholder="Buscar por patente..."
+            value={patentFilter}
+            onChange={(e) => setPatentFilter(e.target.value)}
+            className="w-full bg-[#0a0a0a] border border-gray-800 focus:border-yellow-500/50 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder:text-gray-600 outline-none transition-colors"
+          />
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
+          {patentFilter && (
+            <button 
+              onClick={() => setPatentFilter('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-yellow-500"
+            >
+              ✖
+            </button>
+          )}
+        </div>
       </div>
 
       {isAdding && (

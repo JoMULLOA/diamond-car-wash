@@ -10,8 +10,8 @@ async function run() {
     try {
       await db.run(stmt);
       console.log('Executed:', stmt);
-    } catch (err) {
-      console.log('Skipped/Errored:', err.message);
+    } catch (err: any) {
+      console.log('Skipped/Errored:', err.message || String(err));
     }
   }
   closeDatabase();
