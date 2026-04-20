@@ -48,7 +48,7 @@ body {
 /* Fondo con imagen solo para el portal administrativo */
 .admin-portal-wrapper {
   min-height: 100vh;
-  background-image: url('/fondoDiamond.png');
+  background-image: url('/bg-nimda-premium.png');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -58,11 +58,9 @@ body {
 .admin-portal-wrapper::after {
   content: '';
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.92);
+  inset: 0;
+  /* Deep radial gradient to focus center while darkening corners for ultimate premium feel */
+  background: radial-gradient(circle at center, rgba(10, 10, 10, 0.88) 0%, rgba(5, 5, 5, 0.98) 100%);
   z-index: -1;
   pointer-events: none;
 }
@@ -508,7 +506,7 @@ nav button.active {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(10, 10, 10, 0.7);
+  background: rgba(10, 10, 10, 0.85); /* Slightly darker for better background blending */
   z-index: -1;
 }
 
