@@ -48,19 +48,20 @@ export function PaymentSummary({ exit, onConfirm, onCancel }: PaymentSummaryProp
     }
   };
 
-  const isSubscription = exit.was_subscription || exit.amount === 0;
+  const isExempt = exit.amount === 0;
+  const isSubscriber = exit.was_subscription;
 
   return (
     <div className="fixed inset-0 modal-overlay flex items-center justify-center" style={{ zIndex: 9999 }}>
       <div className="modal-content w-full max-w-md animate-fade-in" style={{ zIndex: 10000 }}>
         {/* Header */}
-        <div className={`py-8 px-6 text-center ${isSubscription ? 'bg-gradient-to-b from-purple-900/50 to-transparent' : 'bg-gradient-to-b from-yellow-900/30 to-transparent'}`}
+        <div className={`py-8 px-6 text-center ${isExempt ? 'bg-gradient-to-b from-purple-900/50 to-transparent' : 'bg-gradient-to-b from-yellow-900/30 to-transparent'}`}
           style={{ borderBottom: '1px solid rgba(212, 175, 55, 0.2)' }}>
-          <div className={`text-sm uppercase tracking-[0.3em] mb-2 ${isSubscription ? 'text-purple-400' : 'text-yellow-500'}`}>
-            {isSubscription ? '🎫 Suscriptor' : '💳 Resumen de Pago'}
+          <div className={`text-sm uppercase tracking-[0.3em] mb-2 ${isExempt ? 'text-purple-400' : 'text-yellow-500'}`}>
+            {isSubscriber ? '🎫 Suscriptor' : '💳 Resumen de Pago'}
           </div>
           <h2 className="text-2xl font-serif font-bold text-white tracking-wider">
-            {isSubscription ? 'SALIDA CONFIRMADA' : 'TOTAL A PAGAR'}
+            {isExempt ? 'SALIDA CONFIRMADA' : 'TOTAL A PAGAR'}
           </h2>
         </div>
 
@@ -91,7 +92,7 @@ export function PaymentSummary({ exit, onConfirm, onCancel }: PaymentSummaryProp
           </div>
 
           {/* Calculation */}
-          {!isSubscription && (
+          {!isExempt && (
             <div className="space-y-2 p-4 rounded-lg bg-gray-900/50">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Minutos:</span>
@@ -109,13 +110,13 @@ export function PaymentSummary({ exit, onConfirm, onCancel }: PaymentSummaryProp
           )}
 
           {/* Total */}
-          <div className={`p-5 rounded-lg text-center ${isSubscription ? 'bg-purple-500/10' : 'bg-yellow-500/10'}`}
-            style={{ border: `1px solid ${isSubscription ? 'rgba(168, 85, 247, 0.3)' : 'rgba(212, 175, 55, 0.3)'}` }}>
-            <p className={`text-sm uppercase tracking-widest mb-2 ${isSubscription ? 'text-purple-400' : 'text-yellow-500'}`}>
-              {isSubscription ? 'Tipo de Cliente' : 'Total a Pagar'}
+          <div className={`p-5 rounded-lg text-center ${isExempt ? 'bg-purple-500/10' : 'bg-yellow-500/10'}`}
+            style={{ border: `1px solid ${isExempt ? 'rgba(168, 85, 247, 0.3)' : 'rgba(212, 175, 55, 0.3)'}` }}>
+            <p className={`text-sm uppercase tracking-widest mb-2 ${isExempt ? 'text-purple-400' : 'text-yellow-500'}`}>
+              {isExempt ? 'Tipo de Cliente' : 'Total a Pagar'}
             </p>
-            <p className={`text-3xl font-bold ${isSubscription ? 'text-purple-400' : 'text-yellow-500'}`}>
-              {isSubscription ? 'SUSCRIPTOR' : formatCurrency(exit.amount)}
+            <p className={`text-3xl font-bold ${isExempt ? 'text-purple-400' : 'text-yellow-500'}`}>
+              {isExempt ? 'SUSCRIPTOR' : formatCurrency(exit.amount)}
             </p>
           </div>
 
@@ -139,9 +140,9 @@ export function PaymentSummary({ exit, onConfirm, onCancel }: PaymentSummaryProp
           <button
             onClick={handleConfirm}
             disabled={loading}
-            className={`flex-1 ${isSubscription ? 'btn-secondary' : 'btn-primary'}`}
+            className={`flex-1 ${isExempt ? 'btn-secondary' : 'btn-primary'}`}
           >
-            {loading ? '...' : isSubscription ? 'Confirmar' : 'Confirmar Pago'}
+            {loading ? '...' : isExempt ? 'Confirmar' : 'Confirmar Pago'}
           </button>
         </div>
       </div>

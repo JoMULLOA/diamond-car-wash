@@ -17,11 +17,13 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     whatsapp_number: '',
     instagram_url: '',
     facebook_url: '',
+    max_capacity: 50,
   });
 
   // Local state for numeric inputs to allow smooth typing
   const [rateInput, setRateInput] = useState<string>(formData.rate_per_minute.toString());
   const [minFeeInput, setMinFeeInput] = useState<string>(formData.min_parking_fee.toString());
+  const [capacityInput, setCapacityInput] = useState<string>((formData.max_capacity ?? 50).toString());
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -35,6 +37,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
       setFormData(settings);
       setRateInput(settings.rate_per_minute.toString());
       setMinFeeInput((settings.min_parking_fee ?? 100).toString());
+      setCapacityInput((settings.max_capacity ?? 50).toString());
     }
   }, [settings]);
 
@@ -212,6 +215,40 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                   </div>
                   <p className="text-[10px] text-gray-600 mt-2 uppercase tracking-tighter">
                     Se cobra este monto si el cálculo por tiempo resulta menor. Solo aplica a estacionamientos sin membresía.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-gray-800">
+              <h3 className="text-sm text-yellow-500 uppercase tracking-widest mb-4 font-serif">
+                Capacidad e Inventario
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-gray-400 uppercase tracking-wider mb-2">
+                    Capacidad Máxima (Cupos Totales)
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={capacityInput}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '' || /^\d+$/.test(value)) {
+                          setCapacityInput(value);
+                          const parsed = parseInt(value);
+                          setFormData({ ...formData, max_capacity: !isNaN(parsed) ? parsed : 0 });
+                        }
+                      }}
+                      className="input flex-1"
+                      placeholder="Ej: 50"
+                    />
+                    <span className="text-gray-500 uppercase tracking-wider text-xs">Vehículos</span>
+                  </div>
+                  <p className="text-[10px] text-gray-600 mt-2 uppercase tracking-tighter">
+                    Define el límite total de vehículos que pueden estar ingresados simultáneamente. El sistema bloqueará nuevos ingresos si se alcanza este límite.
                   </p>
                 </div>
               </div>

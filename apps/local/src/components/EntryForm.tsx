@@ -12,7 +12,9 @@ export function EntryForm({ onSuccess }: EntryFormProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ entry: EntryWithVehicle } | null>(null);
-  const { fetchActiveEntries, fetchStats, isOnline } = useAppStore();
+  const { fetchActiveEntries, fetchStats, isOnline, stats, settings } = useAppStore();
+  const maxCapacity = settings?.max_capacity || 50;
+  const isFull = (stats?.active_entries ?? 0) >= maxCapacity;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +72,17 @@ export function EntryForm({ onSuccess }: EntryFormProps) {
           </p>
         </div>
       )}
+      
+      {isFull && (
+        <div className="mb-6 p-4 border border-red-500/30 rounded-lg bg-red-500/5 animate-pulse">
+          <p className="text-red-500 text-sm text-center font-bold uppercase tracking-widest">
+            🛑 Estacionamiento Completo ({stats?.active_entries}/{maxCapacity})
+          </p>
+          <p className="text-[10px] text-red-400/60 text-center mt-1 uppercase">
+            No se permiten más ingresos hasta que se libere un cupo
+          </p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <div className="mb-8">
@@ -113,14 +126,20 @@ export function EntryForm({ onSuccess }: EntryFormProps) {
 
         <button
           type="submit"
-          className="btn-primary w-full py-5 text-lg"
-          disabled={loading || !tryNormalizePatent(patent)}
+          className={`w-full py-5 text-lg font-bold transition-all ${
+            isFull 
+              ? 'bg-gray-800 text-gray-600 border border-gray-700 cursor-not-allowed' 
+              : 'btn-primary'
+          }`}
+          disabled={loading || !tryNormalizePatent(patent) || isFull}
         >
           {loading ? (
             <span className="flex items-center justify-center gap-3">
               <div className="spinner" style={{ width: 20, height: 20 }}></div>
               Registrando...
             </span>
+          ) : isFull ? (
+            'CAPACIDAD MÁXIMA ALCANZADA'
           ) : (
             <>
               <span className="mr-2">▶</span>

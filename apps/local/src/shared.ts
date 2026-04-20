@@ -85,6 +85,7 @@ export interface Settings {
   min_parking_fee: number;
   business_name: string;
   business_address: string;
+  max_capacity: number;
   whatsapp_number?: string;
   instagram_url?: string;
   facebook_url?: string;

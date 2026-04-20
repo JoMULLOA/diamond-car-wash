@@ -9,8 +9,9 @@ export function Dashboard() {
   const [recentEntries, setRecentEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const { setSettingsOpen } = useSettingsStore();
+  const { settings, setSettingsOpen } = useSettingsStore();
   const { notify } = useNotifications();
+  const maxCapacity = settings?.max_capacity || 50;
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -101,7 +102,7 @@ export function Dashboard() {
               <div className="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
                 <div
                   className="bg-yellow-500 h-full transition-all duration-1000"
-                  style={{ width: `${Math.min(((stats?.active_entries ?? 0) / 50) * 100, 100)}%` }}
+                  style={{ width: `${Math.min(((stats?.active_entries ?? 0) / maxCapacity) * 100, 100)}%` }}
                 ></div>
               </div>
             </div>
@@ -156,13 +157,13 @@ export function Dashboard() {
                   stroke="currentColor"
                   strokeWidth="8"
                   strokeDasharray={364.4}
-                  strokeDashoffset={364.4 - (364.4 * Math.min((stats?.active_entries ?? 0) / 50, 1))}
+                  strokeDashoffset={364.4 - (364.4 * Math.min((stats?.active_entries ?? 0) / maxCapacity, 1))}
                   className="text-yellow-500 transition-all duration-1000"
                   strokeLinecap="round"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-xl sm:text-2xl font-bold text-white leading-none">{Math.round(((stats?.active_entries ?? 0) / 50) * 100)}%</span>
+                <span className="text-xl sm:text-2xl font-bold text-white leading-none">{Math.round(((stats?.active_entries ?? 0) / maxCapacity) * 100)}%</span>
                 <span className="text-[10px] text-gray-500 uppercase tracking-tighter mt-1">Ocupación</span>
               </div>
             </div>

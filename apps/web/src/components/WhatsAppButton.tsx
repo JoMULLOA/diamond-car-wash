@@ -1,12 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 export function WhatsAppButton() {
+  const pathname = usePathname();
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // No necesitamos cargar el número si no vamos a mostrar el botón
+    if (pathname?.startsWith('/nimda-portal')) {
+      setLoading(false);
+      return;
+    }
     fetch('/api/settings')
       .then(res => res.json())
       .then(data => {
@@ -18,7 +25,7 @@ export function WhatsAppButton() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return null;
+  if (loading || pathname?.startsWith('/nimda-portal')) return null;
 
   const message = encodeURIComponent('Hola, quiero más información de los lavados.');
   const finalNumber = whatsappNumber || '56940889752';
