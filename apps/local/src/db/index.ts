@@ -4,10 +4,13 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import dotenv from 'dotenv';
 
-// Load env vars from .env if present
-dotenv.config();
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Force load env vars from apps/local/.env first
+const envPath = path.join(__dirname, '../../.env');
+dotenv.config({ path: envPath });
+// Fallback to current working directory .env
+dotenv.config();
 
 // Singleton pattern for Next.js HMR stability
 declare global {
