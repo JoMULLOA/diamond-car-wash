@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useAppStore } from '../store';
 import { apiFetch } from '../api';
+import { useNotifications } from './NotificationProvider';
 
 export function ActiveEntries() {
   const { 
@@ -15,6 +16,17 @@ export function ActiveEntries() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const { notify } = useNotifications();
+
+  // Focus Search Shortcut
+  useEffect(() => {
+    const handleFocusSearch = () => {
+      const searchInput = document.getElementById('search-patent');
+      if (searchInput) searchInput.focus();
+    };
+    window.addEventListener('focus-search', handleFocusSearch);
+    return () => window.removeEventListener('focus-search', handleFocusSearch);
+  }, []);
 
   useEffect(() => {
     fetchActiveEntries();
@@ -54,7 +66,7 @@ export function ActiveEntries() {
       setCurrentPayment(data.estimate);
     } catch (err) {
       console.error(err);
-      alert('Error al procesar la salida. Intenta nuevamente.');
+      notify('Error al procesar la salida. Intenta nuevamente.', 'error');
     } finally {
       setProcessingId(null);
     }
@@ -77,13 +89,22 @@ export function ActiveEntries() {
 
   if (loading && entries.length === 0) {
     return (
-      <div className="card">
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <div className="spinner mx-auto mb-4" style={{ width: 40, height: 40, borderWidth: 3 }}></div>
-            <p className="text-gray-500">Cargando...</p>
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="flex items-center justify-between p-5 rounded-xl border border-gray-800 bg-gray-900/20 animate-pulse">
+            <div className="flex items-center gap-5">
+              <div className="w-14 h-14 rounded-lg bg-gray-800/50"></div>
+              <div className="space-y-2">
+                <div className="h-6 w-32 bg-gray-800 rounded"></div>
+                <div className="h-4 w-24 bg-gray-800/50 rounded"></div>
+              </div>
+            </div>
+            <div className="flex items-center gap-8">
+              <div className="h-8 w-16 bg-gray-800 rounded"></div>
+              <div className="h-10 w-32 bg-gray-800 rounded"></div>
+            </div>
           </div>
-        </div>
+        ))}
       </div>
     );
   }
@@ -126,11 +147,12 @@ export function ActiveEntries() {
       {entries.length > 0 && (
         <div className="relative group">
           <input
+            id="search-patent"
             type="text"
             value={filter}
             onChange={(e) => setFilter(e.target.value.toUpperCase())}
-            placeholder="BUSCAR POR PATENTE..."
-            className="w-full bg-gray-900/50 border border-gray-800 focus:border-yellow-500/50 rounded-xl px-6 py-4 text-white tracking-[0.2em] font-mono outline-none transition-all placeholder:text-gray-600"
+            placeholder="BUSCAR POR PATENTE (Presiona /)..."
+            className="w-full bg-black/40 border border-gray-800 focus:border-yellow-500/50 rounded-xl px-6 py-4 text-white tracking-[0.2em] font-mono outline-none transition-all placeholder:text-gray-700"
           />
           <div className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-yellow-500 transition-colors">
             🔍

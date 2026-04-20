@@ -12,10 +12,25 @@ import { MemberManagement } from './MemberManagement';
 import { Login } from './Login';
 import { useAppStore, useSettingsStore, useAuthStore } from '../store';
 import { apiFetch } from '../api';
+import { NotificationProvider, useNotifications } from './NotificationProvider';
 
 type Tab = 'dashboard' | 'entry' | 'active' | 'history' | 'agenda' | 'services' | 'memberships';
 
 export function MainDashboard() {
+  const { isAuthenticated } = useAuthStore();
+
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+
+  return (
+    <NotificationProvider>
+      <MainDashboardContent />
+    </NotificationProvider>
+  );
+}
+
+function MainDashboardContent() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [refreshKey, setRefreshKey] = useState(0);
   const {
@@ -26,7 +41,9 @@ export function MainDashboard() {
     isOnline
   } = useAppStore();
   const { isSettingsOpen, setSettingsOpen } = useSettingsStore();
-  const { isAuthenticated, logout } = useAuthStore();
+  const { logout } = useAuthStore();
+  const { notify } = useNotifications();
+  const [isHelpOpen, setHelpOpen] = useState(false);
 
   // Initialize store and verify token
   useEffect(() => {
@@ -34,38 +51,62 @@ export function MainDashboard() {
       try {
         const res = await apiFetch('/api/auth/verify');
         if (res.status === 401) {
-          // Token inválido o expirado → cerrar sesión
           console.warn('[MainDashboard] Token rechazado por el servidor (401). Cerrando sesión.');
           logout();
         }
-        // Cualquier otro error (500, red caída, etc.) → mantener sesión
-        // No queremos expulsar al usuario por un fallo temporal del servidor
       } catch (err) {
         console.warn('[MainDashboard] No se pudo verificar token (fallo de red). Sesión mantenida.', err);
-        // No hacemos logout aquí — es un error de red, no de autenticación
       }
     };
-    if (isAuthenticated) {
-      verifyToken();
-      fetchActiveEntries();
-      fetchStats();
-    }
-  }, [isAuthenticated]);
+    verifyToken();
+    fetchActiveEntries();
+    fetchStats();
+  }, []);
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Alt + 1-7 for tabs
+      if (e.altKey && e.key >= '1' && e.key <= '7') {
+        const index = parseInt(e.key) - 1;
+        const tabs: Tab[] = ['dashboard', 'entry', 'active', 'history', 'agenda', 'services', 'memberships'];
+        if (tabs[index]) {
+          setActiveTab(tabs[index]);
+          notify(`Cambiado a ${tabs[index].toUpperCase()}`, 'info');
+        }
+      }
+      
+      // / for focus search
+      if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('focus-search'));
+      }
+
+      // ? for help
+      if (e.key === '?' && document.activeElement?.tagName !== 'INPUT') {
+        setHelpOpen(prev => !prev);
+      }
+
+      // Esc to close modales
+      if (e.key === 'Escape') {
+        setHelpOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [notify]);
 
   const handleEntrySuccess = () => {
     setRefreshKey((k) => k + 1);
     fetchActiveEntries();
     fetchStats();
     setActiveTab('active');
+    notify('Ingreso registrado con éxito', 'success');
   };
 
   const handlePaymentConfirm = async () => {
-    if (!currentPayment) {
-      console.warn('[MainDashboard] Intento de confirmación sin pago seleccionado');
-      return;
-    }
-
-    console.log('[MainDashboard] Proceso de cobro iniciado para:', currentPayment.patent);
+    if (!currentPayment) return;
 
     try {
       const res = await apiFetch(`/api/entries/${currentPayment.entry_id}/exit`, {
@@ -81,18 +122,16 @@ export function MainDashboard() {
       const data = await res.json();
 
       if (res.ok) {
-        console.log('[MainDashboard] Cobro exitoso:', currentPayment.patent);
         await fetchActiveEntries();
         await fetchStats();
         setCurrentPayment(null);
         window.dispatchEvent(new CustomEvent('entry-success'));
+        notify('Pago procesado correctamente', 'success');
       } else {
-        console.error('[MainDashboard] Error del servidor:', data.error);
-        alert(data.error || 'Error al procesar el pago');
+        notify(data.error || 'Error al procesar el pago', 'error');
       }
     } catch (err) {
-      console.error('[MainDashboard] Error de red en el cobro:', err);
-      alert('Error de conexión con el servidor. Verifica tu red.');
+      notify('Error de conexión', 'error');
     }
   };
 
@@ -116,10 +155,6 @@ export function MainDashboard() {
     { key: 'services', label: 'Servicios', icon: '🧽' },
     { key: 'memberships', label: 'VIP', icon: '👑' },
   ];
-
-  if (!isAuthenticated) {
-    return <Login />;
-  }
 
   return (
     <div className="min-h-screen grid-pattern">
@@ -159,7 +194,14 @@ export function MainDashboard() {
                 style={{ boxShadow: isOnline ? '0 0 15px rgba(212, 175, 55, 0.6)' : 'none' }}
               />
               
-              {/* Logout Button */}
+              <button 
+                onClick={() => setHelpOpen(true)}
+                className="ml-4 w-8 h-8 flex items-center justify-center rounded-full border border-gray-800 text-gray-500 hover:text-yellow-500 hover:border-yellow-500/50 transition-all font-bold"
+                title="Atajos de teclado (?)"
+              >
+                ?
+              </button>
+
               <button 
                 onClick={logout}
                 className="ml-4 px-3 py-1 text-xs border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 rounded transition-colors"
@@ -246,10 +288,45 @@ export function MainDashboard() {
           exit={currentPayment}
           onConfirm={handlePaymentConfirm}
           onCancel={() => {
-            console.log('[MainDashboard] Pago cancelado por el usuario');
             setCurrentPayment(null);
           }}
         />
+      )}
+
+      {/* Shortcuts Help Modal */}
+      {isHelpOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setHelpOpen(false)}></div>
+          <div className="relative bg-gray-900 border border-yellow-500/30 rounded-2xl p-8 max-w-md w-full shadow-2xl animate-modal-enter">
+            <h3 className="text-2xl font-serif font-bold text-white mb-6 flex items-center gap-3">
+              <span className="text-yellow-500">⌨</span> Atajos de Teclado
+            </h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center py-2 border-b border-gray-800">
+                <span className="text-gray-400">Cambiar Pestañas</span>
+                <span className="px-2 py-1 bg-gray-800 rounded text-yellow-500 font-mono text-xs uppercase">Alt + 1-7</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-800">
+                <span className="text-gray-400">Buscar Patente</span>
+                <span className="px-2 py-1 bg-gray-800 rounded text-yellow-500 font-mono text-xs uppercase">/</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-800">
+                <span className="text-gray-400">Ayuda</span>
+                <span className="px-2 py-1 bg-gray-800 rounded text-yellow-500 font-mono text-xs uppercase">?</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-800">
+                <span className="text-gray-400">Cerrar Modales</span>
+                <span className="px-2 py-1 bg-gray-800 rounded text-yellow-500 font-mono text-xs uppercase">Esc</span>
+              </div>
+            </div>
+            <button 
+              onClick={() => setHelpOpen(false)}
+              className="mt-8 w-full btn-primary py-3"
+            >
+              ENTENDIDO
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
