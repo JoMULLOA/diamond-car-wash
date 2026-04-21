@@ -1,5 +1,10 @@
-import { useState, useEffect } from 'react';
 import { apiFetch } from '../api';
+import { 
+  Banknote, 
+  TrendingUp, 
+  Car, 
+  Calendar 
+} from 'lucide-react';
 
 type FilterType = 'day' | 'week' | 'month';
 
@@ -233,7 +238,9 @@ export function TransactionHistory() {
                 {formatCurrency(totalRevenue)}
               </p>
             </div>
-            <div className="text-3xl sm:text-5xl opacity-20">◆</div>
+            <div className="text-gray-500 opacity-20">
+              <Banknote size={40} />
+            </div>
           </div>
           <p className="text-gray-600 text-xs uppercase tracking-wider">Total período</p>
         </div>
@@ -246,7 +253,9 @@ export function TransactionHistory() {
                 {totalTransactions}
               </p>
             </div>
-            <div className="text-3xl sm:text-5xl opacity-20">◇</div>
+            <div className="text-gray-500 opacity-20">
+              <TrendingUp size={40} />
+            </div>
           </div>
           <p className="text-gray-600 text-xs uppercase tracking-wider">Pagos recibidos</p>
         </div>
@@ -259,7 +268,9 @@ export function TransactionHistory() {
                 {totalEntries}
               </p>
             </div>
-            <div className="text-3xl sm:text-5xl opacity-20">◎</div>
+            <div className="text-gray-500 opacity-20">
+              <Car size={40} />
+            </div>
           </div>
           <p className="text-gray-600 text-xs uppercase tracking-wider">Vehículos registrados</p>
         </div>

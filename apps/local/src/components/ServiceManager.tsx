@@ -1,6 +1,19 @@
-import { useState, useEffect } from 'react';
-import type { Service } from '../shared';
 import { apiFetch } from '../api';
+import { 
+  Plus, 
+  Pencil, 
+  Trash2, 
+  Eye, 
+  ChevronUp, 
+  Pause, 
+  Play, 
+  Camera, 
+  Sparkles, 
+  Droplets,
+  FileText,
+  Wand2,
+  Wrench
+} from 'lucide-react';
 
 export function ServiceManager() {
   const [services, setServices] = useState<Service[]>([]);
@@ -190,9 +203,10 @@ export function ServiceManager() {
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(true); }}
-          className="btn-primary text-sm"
+          className="btn-primary text-sm flex items-center gap-2"
         >
-          + Nuevo Servicio
+          <Plus size={18} />
+          Nuevo Servicio
         </button>
       </div>
 
@@ -303,9 +317,9 @@ export function ServiceManager() {
                     />
                     <label 
                       htmlFor="media-upload" 
-                      className="cursor-pointer border-2 border-dashed border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center hover:border-yellow-500/50 hover:bg-yellow-500/5 transition-all"
+                      className="cursor-pointer border-2 border-dashed border-gray-700 rounded-lg p-4 flex flex-col items-center justify-center hover:border-yellow-500/50 hover:bg-yellow-500/5 transition-all text-center"
                     >
-                      <span className="text-2xl mb-1">📸</span>
+                      <Camera className="text-gray-500 mb-2" size={24} />
                       <span className="text-xs text-gray-400">
                         {selectedFile ? selectedFile.name : 'Subir foto o video corto'}
                       </span>
@@ -340,7 +354,7 @@ export function ServiceManager() {
         {services.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-800 flex items-center justify-center">
-              <span className="text-4xl text-gray-600">🧽</span>
+              <Sparkles className="text-gray-600" size={32} />
             </div>
             <p className="text-xl text-gray-400 mb-2">Sin servicios registrados</p>
             <p className="text-sm text-gray-600">
@@ -370,7 +384,7 @@ export function ServiceManager() {
                           <img src={service.media_url.startsWith('http') ? service.media_url : `http://localhost:3001${service.media_url}`} className="w-full h-full object-cover" alt={service.name} />
                         )
                       ) : (
-                        <span className="text-lg">🚿</span>
+                        <Droplets className="text-gray-700" size={20} />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -406,7 +420,7 @@ export function ServiceManager() {
                         }`}
                         title={expandedServiceId === service.id ? 'Ocultar Detalles' : 'Ver Detalles'}
                       >
-                        <span className="text-sm">{expandedServiceId === service.id ? '⬆️' : '👁️'}</span>
+                        <span className="flex items-center">{expandedServiceId === service.id ? <ChevronUp size={14} /> : <Eye size={14} />}</span>
                         <span className="hidden sm:inline">{expandedServiceId === service.id ? 'Ocultar' : 'Detalles'}</span>
                       </button>
                     )}
@@ -419,7 +433,7 @@ export function ServiceManager() {
                       }`}
                       title={service.active ? 'Desactivar' : 'Activar'}
                     >
-                      <span className="text-sm">{service.active ? '⏸️' : '▶️'}</span>
+                      <span className="flex items-center">{service.active ? <Pause size={14} /> : <Play size={14} />}</span>
                       <span className="hidden sm:inline">{service.active ? 'Desactivar' : 'Activar'}</span>
                     </button>
                     <button
@@ -427,7 +441,7 @@ export function ServiceManager() {
                       className="px-3 py-2 sm:py-1.5 text-xs rounded border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors flex items-center gap-1.5"
                       title="Editar"
                     >
-                      <span className="text-sm">✏️</span>
+                      <Pencil size={14} />
                       <span className="hidden sm:inline">Editar</span>
                     </button>
                     <button
@@ -435,7 +449,7 @@ export function ServiceManager() {
                       className="px-3 py-2 sm:py-1.5 text-xs rounded border border-red-900 text-red-500 hover:text-red-400 hover:border-red-500 transition-colors flex items-center gap-1.5"
                       title="Eliminar"
                     >
-                      <span className="text-sm">🗑️</span>
+                      <Trash2 size={14} />
                       <span className="hidden sm:inline">Eliminar</span>
                     </button>
                   </div>
@@ -449,7 +463,7 @@ export function ServiceManager() {
                     {service.description && (
                       <div className="mb-6">
                         <h4 className="text-xs text-yellow-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                          <span>📝</span> Descripción
+                          <FileText size={12} /> Descripción
                         </h4>
                         <p className="text-sm text-gray-300 leading-relaxed bg-gray-900/50 p-4 rounded-lg border border-gray-800">
                           {service.description}
@@ -463,7 +477,7 @@ export function ServiceManager() {
                       {service.process && (
                         <div>
                           <h4 className="text-xs text-yellow-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                            <span>✨</span> Proceso de Detallado
+                            <Wand2 size={12} /> Proceso de Detallado
                           </h4>
                           <div className="relative pl-3 space-y-3">
                             <div className="absolute top-2 bottom-2 left-[5px] w-[2px] bg-gradient-to-b from-yellow-500/50 to-transparent rounded-full"></div>
@@ -481,7 +495,7 @@ export function ServiceManager() {
                       {service.tools_used && (
                         <div>
                           <h4 className="text-xs text-yellow-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                            <span>🛠️</span> Equipamiento Premium
+                            <Wrench size={12} /> Equipamiento Premium
                           </h4>
                           <div className="flex flex-wrap gap-2">
                             {service.tools_used.split(',').map((tool, i) => (

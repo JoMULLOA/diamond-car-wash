@@ -1,7 +1,11 @@
-import { useEffect, useState, useMemo } from 'react';
-import { useAppStore } from '../store';
-import { apiFetch } from '../api';
 import { useNotifications } from './NotificationProvider';
+import { 
+  RefreshCw, 
+  Search, 
+  SquareParking, 
+  Car, 
+  ArrowRight 
+} from 'lucide-react';
 
 export function ActiveEntries() {
   const { 
@@ -118,10 +122,11 @@ export function ActiveEntries() {
         </h2>
         <button
           onClick={fetchActiveEntries}
-          className="btn-secondary text-sm"
+          className={`btn-secondary text-sm flex items-center gap-2 ${loading ? 'opacity-50' : ''}`}
           disabled={loading}
         >
-          {loading ? '...' : '↻ Actualizar'}
+          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+          {loading ? 'Actualizando...' : 'Actualizar'}
         </button>
       </div>
 
@@ -155,7 +160,7 @@ export function ActiveEntries() {
             className="w-full bg-black/40 border border-gray-800 focus:border-yellow-500/50 rounded-xl px-6 py-4 text-white tracking-[0.2em] font-mono outline-none transition-all placeholder:text-gray-700"
           />
           <div className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-yellow-500 transition-colors">
-            🔍
+            <Search size={20} />
           </div>
         </div>
       )}
@@ -165,7 +170,7 @@ export function ActiveEntries() {
         {entries.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-800 flex items-center justify-center">
-              <span className="text-4xl text-gray-600">P</span>
+              <SquareParking className="text-gray-600" size={32} />
             </div>
             <p className="text-xl text-gray-400 mb-2">Sin vehículos estacionados</p>
             <p className="text-sm text-gray-600">
@@ -185,7 +190,7 @@ export function ActiveEntries() {
               >
                 <div className="flex items-center gap-4 sm:gap-5 mb-4 sm:mb-0 w-full sm:w-auto overflow-hidden">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-lg bg-gray-800/50 flex items-center justify-center border border-gray-700 group-hover:border-yellow-500/20 transition-colors">
-                    <span className="text-xl sm:text-2xl">🚗</span>
+                    <Car size={24} className="text-gray-500" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -225,7 +230,7 @@ export function ActiveEntries() {
                     ) : (
                       <>
                         <span className="hidden sm:inline">PROCESAR</span> SALIDA
-                        <span className="hidden sm:inline group-hover/btn:translate-x-1 transition-transform">→</span>
+                        <ArrowRight size={16} className="hidden sm:inline group-hover/btn:translate-x-1 transition-transform" />
                       </>
                     )}
                   </button>

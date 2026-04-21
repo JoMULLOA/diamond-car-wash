@@ -2,6 +2,14 @@ import { useState } from 'react';
 import { tryNormalizePatent, getPatentType, getPatentTypeDescription, type EntryWithVehicle } from '../shared';
 import { useAppStore } from '../store';
 import { apiFetch } from '../api';
+import { 
+  AlertTriangle, 
+  Octagon, 
+  Check, 
+  ArrowRight, 
+  CheckCircle, 
+  Ticket 
+} from 'lucide-react';
 
 interface EntryFormProps {
   onSuccess: () => void;
@@ -73,16 +81,17 @@ export function EntryForm({ onSuccess }: EntryFormProps) {
 
       {!isOnline && (
         <div className="mb-6 p-4 border border-yellow-500/30 rounded-lg bg-yellow-500/5">
-          <p className="text-yellow-500/80 text-sm text-center">
-            ⚠ Modo local - Los datos se sincronizarán cuando haya conexión
+          <p className="text-yellow-500/80 text-sm text-center flex items-center justify-center gap-2">
+            <AlertTriangle size={16} /> 
+            Modo local - Los datos se sincronizarán cuando haya conexión
           </p>
         </div>
       )}
       
       {isFull && (
         <div className="mb-6 p-4 border border-red-500/30 rounded-lg bg-red-500/5 animate-pulse">
-          <p className="text-red-500 text-sm text-center font-bold uppercase tracking-widest">
-            🛑 Estacionamiento Completo ({stats?.active_entries}/{maxCapacity})
+          <p className="text-red-500 text-sm text-center font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+            <Octagon size={18} /> Estacionamiento Completo ({stats?.active_entries}/{maxCapacity})
           </p>
           <p className="text-[10px] text-red-400/60 text-center mt-1 uppercase">
             No se permiten más ingresos hasta que se libere un cupo
@@ -117,8 +126,8 @@ export function EntryForm({ onSuccess }: EntryFormProps) {
           
           {patentType && !error && (
             <div className="mt-3 text-center">
-              <p className="text-yellow-500 text-sm">
-                ✓ {getPatentTypeDescription(patentType)}
+              <p className="text-yellow-500 text-sm flex items-center justify-center gap-1">
+                <Check size={14} /> {getPatentTypeDescription(patentType)}
               </p>
             </div>
           )}
@@ -147,10 +156,10 @@ export function EntryForm({ onSuccess }: EntryFormProps) {
           ) : isFull ? (
             'CAPACIDAD MÁXIMA ALCANZADA'
           ) : (
-            <>
-              <span className="mr-2">▶</span>
+            <span className="flex items-center justify-center gap-2">
+              <ArrowRight size={20} />
               REGISTRAR ENTRADA
-            </>
+            </span>
           )}
         </button>
       </form>
@@ -158,7 +167,7 @@ export function EntryForm({ onSuccess }: EntryFormProps) {
       {result && (
         <div className="mt-8 p-6 border border-green-500/30 rounded-lg bg-green-500/5 animate-fade-in">
           <div className="text-center mb-4">
-            <span className="text-4xl mb-2 block">✓</span>
+            <CheckCircle className="text-green-500 mx-auto mb-2" size={48} />
             <p className="text-xl font-serif font-bold text-green-500">ENTRADA REGISTRADA</p>
           </div>
           <div className="space-y-2 text-center">
@@ -167,8 +176,8 @@ export function EntryForm({ onSuccess }: EntryFormProps) {
               {result.entry.patent}
             </p>
             {result.entry.vehicle_type === 'subscription' && (
-              <p className="text-purple-500 text-sm uppercase tracking-wider mt-2">
-                🎫 Suscriptor Detectado
+              <p className="text-purple-500 text-sm uppercase tracking-wider mt-2 flex items-center justify-center gap-2">
+                <Ticket size={16} /> Suscriptor Detectado
               </p>
             )}
           </div>

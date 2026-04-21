@@ -1,4 +1,5 @@
 import { useAppStore } from '../store';
+import { WifiOff } from 'lucide-react';
 
 export function OfflineIndicator() {
   const isOnline = useAppStore((s) => s.isOnline);
@@ -13,7 +14,7 @@ export function OfflineIndicator() {
         borderBottom: '1px solid rgba(251, 191, 36, 0.3)'
       }}
     >
-      <span className="text-lg">⚠</span>
+      <WifiOff size={18} className="text-amber-500" />
       <span className="text-amber-400 text-sm uppercase tracking-wider">
         Modo Local — Los datos se sincronizarán cuando haya conexión
       </span>

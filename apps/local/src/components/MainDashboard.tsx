@@ -13,6 +13,18 @@ import { Login } from './Login';
 import { useAppStore, useSettingsStore, useAuthStore } from '../store';
 import { apiFetch } from '../api';
 import { NotificationProvider, useNotifications } from './NotificationProvider';
+import { 
+  LayoutDashboard, 
+  PlusCircle, 
+  Car, 
+  History, 
+  Calendar, 
+  Sparkles, 
+  Gem, 
+  HelpCircle, 
+  LogOut,
+  Keyboard
+} from 'lucide-react';
 
 type Tab = 'dashboard' | 'entry' | 'active' | 'history' | 'agenda' | 'services' | 'memberships';
 
@@ -146,14 +158,14 @@ function MainDashboardContent() {
     };
   }, []);
 
-  const tabs: { key: Tab; label: string; icon: string }[] = [
-    { key: 'dashboard', label: 'Inicio', icon: '◆' },
-    { key: 'entry', label: 'Entrada', icon: '▶' },
-    { key: 'active', label: 'Vehículos', icon: '◎' },
-    { key: 'history', label: 'Historial', icon: '◈' },
-    { key: 'agenda', label: 'Agenda', icon: '🖎' },
-    { key: 'services', label: 'Servicios', icon: '🧽' },
-    { key: 'memberships', label: 'VIP', icon: '👑' },
+  const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
+    { key: 'dashboard', label: 'Inicio', icon: <LayoutDashboard size={18} /> },
+    { key: 'entry', label: 'Entrada', icon: <PlusCircle size={18} /> },
+    { key: 'active', label: 'Vehículos', icon: <Car size={18} /> },
+    { key: 'history', label: 'Historial', icon: <History size={18} /> },
+    { key: 'agenda', label: 'Agenda', icon: <Calendar size={18} /> },
+    { key: 'services', label: 'Servicios', icon: <Sparkles size={18} /> },
+    { key: 'memberships', label: 'VIP', icon: <Gem size={18} /> },
   ];
 
   return (
@@ -196,17 +208,18 @@ function MainDashboardContent() {
               
               <button 
                 onClick={() => setHelpOpen(true)}
-                className="ml-4 w-8 h-8 flex items-center justify-center rounded-full border border-gray-800 text-gray-500 hover:text-yellow-500 hover:border-yellow-500/50 transition-all font-bold"
+                className="ml-4 w-8 h-8 flex items-center justify-center rounded-full border border-gray-800 text-gray-500 hover:text-yellow-500 hover:border-yellow-500/50 transition-all"
                 title="Atajos de teclado (?)"
               >
-                ?
+                <HelpCircle size={18} />
               </button>
 
               <button 
                 onClick={logout}
-                className="ml-4 px-3 py-1 text-xs border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 rounded transition-colors"
+                className="ml-4 px-3 py-1 text-xs border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 rounded transition-colors flex items-center gap-2"
               >
-                Cerrar Sesión
+                <LogOut size={14} />
+                <span className="hidden sm:inline">Cerrar Sesión</span>
               </button>
             </div>
           </div>
@@ -230,7 +243,7 @@ function MainDashboardContent() {
                   }
                 `}
               >
-                <span className="mr-2 opacity-60">{tab.icon}</span>
+                <span className="mr-2 opacity-60 flex items-center">{tab.icon}</span>
                 {tab.label}
                 {activeTab === tab.key && (
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
@@ -299,7 +312,8 @@ function MainDashboardContent() {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setHelpOpen(false)}></div>
           <div className="relative bg-gray-900 border border-yellow-500/30 rounded-2xl p-8 max-w-md w-full shadow-2xl animate-modal-enter">
             <h3 className="text-2xl font-serif font-bold text-white mb-6 flex items-center gap-3">
-              <span className="text-yellow-500">⌨</span> Atajos de Teclado
+              <Keyboard className="text-yellow-500" size={24} />
+              Atajos de Teclado
             </h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center py-2 border-b border-gray-800">

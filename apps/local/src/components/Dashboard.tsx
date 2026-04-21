@@ -1,8 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { DashboardStats } from '../shared';
-import { useSettingsStore } from '../store';
-import { apiFetch } from '../api';
 import { useNotifications } from './NotificationProvider';
+import { 
+  Settings, 
+  Car, 
+  ClipboardList, 
+  Banknote, 
+  Zap, 
+  PlusCircle, 
+  Calendar, 
+  Sparkles, 
+  Clock,
+  ArrowRight
+} from 'lucide-react';
 
 export function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -78,9 +86,10 @@ export function Dashboard() {
           </div>
           <button
             onClick={() => setSettingsOpen(true)}
-            className="btn-secondary text-sm"
+            className="btn-secondary text-sm flex items-center gap-2"
           >
-            ⚙ Configuración
+            <Settings size={16} />
+            <span>Configuración</span>
           </button>
         </div>
 
@@ -97,7 +106,9 @@ export function Dashboard() {
                     {stats?.active_entries ?? 0}
                   </p>
                 </div>
-                <div className="text-3xl sm:text-4xl opacity-20 group-hover:opacity-40 transition-opacity">🚗</div>
+                <div className="text-gray-500 opacity-20 group-hover:opacity-40 transition-opacity">
+                  <Car size={32} />
+                </div>
               </div>
               <div className="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
                 <div
@@ -116,7 +127,9 @@ export function Dashboard() {
                     {stats?.total_today ?? 0}
                   </p>
                 </div>
-                <div className="text-3xl sm:text-4xl opacity-20 group-hover:opacity-40 transition-opacity">📋</div>
+                <div className="text-gray-500 opacity-20 group-hover:opacity-40 transition-opacity">
+                  <ClipboardList size={32} />
+                </div>
               </div>
               <p className="text-gray-600 text-xs uppercase tracking-[0.2em]">Acumulado Hoy</p>
             </div>
@@ -130,7 +143,9 @@ export function Dashboard() {
                     {formatCurrency(stats?.revenue_today ?? 0)}
                   </p>
                 </div>
-                <div className="text-3xl sm:text-4xl opacity-20 group-hover:opacity-40 transition-opacity">💰</div>
+                <div className="text-gray-500 opacity-20 group-hover:opacity-40 transition-opacity">
+                  <Banknote size={32} />
+                </div>
               </div>
               <p className="text-gray-600 text-xs uppercase tracking-[0.2em]">Total Diario (CLP)</p>
             </div>
@@ -175,14 +190,14 @@ export function Dashboard() {
           {/* Quick Actions */}
           <div className="lg:col-span-2 card">
             <h3 className="text-xl font-serif font-semibold text-white mb-6 tracking-wider flex items-center gap-3">
-              <span className="text-yellow-500">⚡</span> Acciones Rápidas
+              <Zap className="text-yellow-500" size={20} /> Acciones Rápidas
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
-                { tab: 'entry', label: 'Entrada', icon: '▶', premium: true },
-                { tab: 'active', label: 'Vehículos', icon: '◎', premium: true },
-                { tab: 'agenda', label: 'Agenda', icon: '📅', premium: false },
-                { tab: 'services', label: 'Servicios', icon: '🧽', premium: false },
+                { tab: 'entry', label: 'Entrada', icon: <PlusCircle size={24} />, premium: true },
+                { tab: 'active', label: 'Vehículos', icon: <Car size={24} />, premium: true },
+                { tab: 'agenda', label: 'Agenda', icon: <Calendar size={24} />, premium: false },
+                { tab: 'services', label: 'Servicios', icon: <Sparkles size={24} />, premium: false },
               ].map((action) => (
                 <button
                   key={action.tab}
@@ -208,7 +223,7 @@ export function Dashboard() {
           {/* Recent Activity Feed */}
           <div className="card flex flex-col">
             <h3 className="text-xl font-serif font-semibold text-white mb-6 tracking-wider flex items-center gap-3">
-              <span className="text-yellow-500">🕒</span> Actividad Reciente
+              <Clock className="text-yellow-500" size={20} /> Actividad Reciente
             </h3>
             <div className="space-y-4 flex-1">
               {recentEntries.length === 0 ? (
@@ -217,7 +232,9 @@ export function Dashboard() {
                 recentEntries.map((entry) => (
                   <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-900/40 border border-gray-800/50 hover:border-yellow-500/20 transition-all">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded bg-gray-800 flex items-center justify-center text-sm">🚗</div>
+                      <div className="w-8 h-8 rounded bg-gray-800 flex items-center justify-center text-gray-500">
+                        <Car size={16} />
+                      </div>
                       <div>
                         <p className="text-xs font-mono font-bold text-white tracking-widest">{entry.patent}</p>
                         <p className="text-[9px] text-gray-600 uppercase font-bold">Salida: {new Date(entry.exit_time).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</p>
@@ -232,9 +249,9 @@ export function Dashboard() {
             </div>
             <button
               onClick={() => window.dispatchEvent(new CustomEvent('tab-change', { detail: 'history' }))}
-              className="mt-6 text-[10px] uppercase tracking-[0.2em] text-gray-500 hover:text-yellow-500 transition-colors text-center font-bold"
+              className="mt-6 text-[10px] uppercase tracking-[0.2em] text-gray-500 hover:text-yellow-500 transition-colors text-center font-bold flex items-center justify-center gap-2"
             >
-              Ver Historial Completo →
+              Ver Historial Completo <ArrowRight size={12} />
             </button>
           </div>
         </div>

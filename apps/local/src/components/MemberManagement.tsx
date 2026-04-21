@@ -1,5 +1,17 @@
-import { useState, useEffect } from 'react';
 import { apiFetch } from '../api';
+import { 
+  Gem, 
+  Plus, 
+  X, 
+  Search, 
+  List, 
+  SquareParking, 
+  Waves, 
+  Pencil, 
+  Trash2, 
+  Check,
+  CreditCard
+} from 'lucide-react';
 
 interface Service {
   id: string;
@@ -217,7 +229,7 @@ export function MemberManagement() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#0a0a0a] border border-[#d4af37]/20 p-6 rounded-lg shadow-lg">
         <div>
           <h2 className="text-2xl font-bold text-gray-100 flex items-center gap-3">
-            <span className="text-yellow-500">👑</span> Club Diamond
+            <Gem className="text-yellow-500" size={24} /> Club Diamond
           </h2>
           <p className="text-gray-400 text-sm mt-1">Gestión de socios y mensualidades</p>
         </div>
@@ -240,9 +252,10 @@ export function MemberManagement() {
               setSelectedServiceIds([]);
             }
           }}
-          className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded transition-colors"
+          className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded transition-colors flex items-center gap-2"
         >
-          {isAdding ? 'Cancelar' : '+ Nuevo Socio'}
+          {isAdding ? <X size={18} /> : <Plus size={18} />}
+          {isAdding ? 'Cancelar' : 'Nuevo Socio'}
         </button>
       </div>
 
@@ -250,14 +263,14 @@ export function MemberManagement() {
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="flex gap-2 border border-gray-800 rounded-lg p-1 bg-[#0a0a0a] overflow-x-auto">
           {([
-            { key: 'all' as TabFilter, label: 'Todos', icon: '📋' },
-            { key: 'parking' as TabFilter, label: 'Estacionamiento', icon: '🅿️' },
-            { key: 'wash' as TabFilter, label: 'Club de Lavado', icon: '🧼' },
+            { key: 'all' as TabFilter, label: 'Todos', icon: <List size={16} /> },
+            { key: 'parking' as TabFilter, label: 'Parking', icon: <SquareParking size={16} /> },
+            { key: 'wash' as TabFilter, label: 'Club Lavado', icon: <Waves size={16} /> },
           ]).map(tab => (
             <button
               key={tab.key}
               onClick={() => setTabFilter(tab.key)}
-              className={`px-4 py-2 text-sm rounded transition-colors whitespace-nowrap ${
+              className={`px-4 py-2 text-sm rounded transition-colors whitespace-nowrap flex items-center gap-2 ${
                 tabFilter === tab.key
                   ? 'bg-yellow-500/10 text-yellow-500'
                   : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
@@ -276,13 +289,15 @@ export function MemberManagement() {
             onChange={(e) => setPatentFilter(e.target.value)}
             className="w-full bg-[#0a0a0a] border border-gray-800 focus:border-yellow-500/50 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder:text-gray-600 outline-none transition-colors"
           />
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+            <Search size={18} />
+          </span>
           {patentFilter && (
             <button 
               onClick={() => setPatentFilter('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-yellow-500"
             >
-              ✖
+              <X size={18} />
             </button>
           )}
         </div>
@@ -303,7 +318,9 @@ export function MemberManagement() {
                   : 'border-gray-700 hover:border-gray-500'
               }`}
             >
-              <div className="text-2xl mb-2">🅿️</div>
+              <div className="mb-2">
+                <SquareParking size={28} className={newType === 'parking' ? 'text-yellow-500' : 'text-gray-500'} />
+              </div>
               <div className={`font-medium ${newType === 'parking' ? 'text-yellow-500' : 'text-gray-300'}`}>
                 Estacionamiento
               </div>
@@ -318,7 +335,9 @@ export function MemberManagement() {
                   : 'border-gray-700 hover:border-gray-500'
               }`}
             >
-              <div className="text-2xl mb-2">🧼</div>
+              <div className="mb-2">
+                <Waves size={28} className={newType === 'wash' ? 'text-yellow-500' : 'text-gray-500'} />
+              </div>
               <div className={`font-medium ${newType === 'wash' ? 'text-yellow-500' : 'text-gray-300'}`}>
                 Club de Lavado
               </div>
@@ -411,7 +430,7 @@ export function MemberManagement() {
                           ? 'border-blue-500 bg-blue-500 text-white' 
                           : 'border-gray-600'
                       }`}>
-                        {isSelected && <span className="text-xs">✓</span>}
+                        {isSelected && <Check size={12} />}
                       </div>
                     </button>
                   );
@@ -470,12 +489,12 @@ export function MemberManagement() {
                     {m.patent}
                   </span>
                   {m.type === 'wash' ? (
-                    <span className="inline-flex items-center gap-1 bg-blue-900/30 text-blue-400 border border-blue-800/50 px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium uppercase tracking-wider">
-                      🧼 Lavado
+                    <span className="inline-flex items-center gap-1.5 bg-blue-900/30 text-blue-400 border border-blue-800/50 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium uppercase tracking-wider">
+                      <Waves size={12} /> Lavado
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 bg-purple-900/30 text-purple-400 border border-purple-800/50 px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium uppercase tracking-wider">
-                      🅿️ Parking
+                    <span className="inline-flex items-center gap-1.5 bg-purple-900/30 text-purple-400 border border-purple-800/50 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium uppercase tracking-wider">
+                      <SquareParking size={12} /> Parking
                     </span>
                   )}
                 </div>
@@ -523,8 +542,9 @@ export function MemberManagement() {
                   {!m.is_current_month_paid ? (
                     <button
                       onClick={() => handlePayMonth(m)}
-                      className="text-yellow-500 hover:text-yellow-400 text-xs sm:text-sm font-bold transition-all border border-yellow-500/50 hover:border-yellow-400 px-4 py-2 rounded bg-yellow-500/10 hover:bg-yellow-500/20 shadow-[0_0_15px_rgba(212,175,55,0.15)] whitespace-nowrap"
+                      className="text-yellow-500 hover:text-yellow-400 text-xs sm:text-sm font-bold transition-all border border-yellow-500/50 hover:border-yellow-400 px-4 py-2 rounded bg-yellow-500/10 hover:bg-yellow-500/20 shadow-[0_0_15px_rgba(212,175,55,0.15)] whitespace-nowrap flex items-center gap-2"
                     >
+                      <CreditCard size={14} />
                       {`Cobrar ${formatCurrency(m.monthly_price)}`}
                     </button>
                   ) : (
@@ -538,17 +558,17 @@ export function MemberManagement() {
                 <div className="flex items-center gap-2 mt-2 sm:mt-0">
                   <button
                     onClick={() => handleEdit(m)}
-                    className="text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 px-2 py-1 rounded text-xs transition-colors"
+                    className="text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 p-1.5 rounded transition-colors"
                     title="Editar Socio"
                   >
-                    ✏️
+                    <Pencil size={14} />
                   </button>
                   <button
                     onClick={() => handleDelete(m)}
-                    className="text-red-500 hover:text-red-400 border border-red-900 hover:border-red-500 px-2 py-1 rounded text-xs transition-colors"
+                    className="text-red-500 hover:text-red-400 border border-red-900/50 hover:border-red-500 p-1.5 rounded transition-colors"
                     title="Eliminar Socio"
                   >
-                    🗑️
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </div>

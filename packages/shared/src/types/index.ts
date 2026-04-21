@@ -94,3 +94,31 @@ export interface DashboardStats {
   revenue_today: number;
   last_sync: number | null;
 }
+
+// Monthly Memberships (Lujo/Premium)
+export type MembershipType = 'parking' | 'wash';
+
+export interface MonthlyMembership {
+  id: string;
+  patent: string;
+  owner_name: string;
+  owner_phone: string;
+  type: MembershipType;
+  service_id: string | null;
+  monthly_price: number;
+  washes_remaining: number;
+  status: string;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface MonthlyPayment {
+  id: string;
+  membership_id: string;
+  month: number;
+  year: number;
+  amount: number;
+  status: string;
+  paid_at: number | null;
+  created_at: number;
+}

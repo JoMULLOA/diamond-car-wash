@@ -1,6 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { Booking } from '../shared';
 import { apiFetch } from '../api';
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Calendar, 
+  CreditCard,
+  CheckCircle,
+  Clock,
+  Banknote,
+  XCircle,
+  AlertCircle
+} from 'lucide-react';
 
 type ViewMode = 'day' | 'week';
 
@@ -136,8 +145,8 @@ export function Agenda() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-wider">
-            AGENDA
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-wider flex items-center gap-3">
+            <Calendar className="text-yellow-500" size={28} /> AGENDA
           </h2>
           <p className="text-gray-500 text-sm mt-1">Reservas y turnos programados</p>
         </div>
@@ -170,9 +179,9 @@ export function Agenda() {
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigateDate(viewMode === 'week' ? -7 : -1)}
-            className="px-3 py-2 text-gray-400 hover:text-white transition-colors text-lg"
+            className="px-3 py-2 text-gray-400 hover:text-white transition-colors"
           >
-            ◀
+            <ChevronLeft size={24} />
           </button>
           <div className="text-center">
             <p className="text-xl font-serif font-bold text-white capitalize">
@@ -184,9 +193,9 @@ export function Agenda() {
           </div>
           <button
             onClick={() => navigateDate(viewMode === 'week' ? 7 : 1)}
-            className="px-3 py-2 text-gray-400 hover:text-white transition-colors text-lg"
+            className="px-3 py-2 text-gray-400 hover:text-white transition-colors"
           >
-            ▶
+            <ChevronRight size={24} />
           </button>
         </div>
         <div className="flex justify-center mt-3">
@@ -227,7 +236,7 @@ export function Agenda() {
         {bookings.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-800 flex items-center justify-center">
-              <span className="text-3xl text-gray-600">📅</span>
+              <Calendar className="text-gray-600" size={32} />
             </div>
             <p className="text-gray-400 mb-1">Sin reservas programadas</p>
             <p className="text-xs text-gray-600">Las reservas online aparecerán aquí automáticamente</p>
@@ -257,7 +266,9 @@ export function Agenda() {
                           <div className="flex items-center gap-4">
                             {/* Time Block */}
                             <div className="text-center min-w-[70px]">
-                              <p className="text-lg font-bold text-white">{booking.start_time}</p>
+                              <p className="text-lg font-bold text-white flex items-center justify-center gap-1">
+                                <Clock size={14} className="text-gray-500" /> {booking.start_time}
+                              </p>
                               <p className="text-xs text-gray-500">{booking.end_time}</p>
                             </div>
 
@@ -314,10 +325,10 @@ export function Agenda() {
                             {(booking.remaining_balance > 0 || booking.status === 'pending_payment') && booking.status !== 'cancelled' && (
                               <button
                                 onClick={() => handleAction(booking.id, 'tuu-remote')}
-                                className="px-3 py-1.5 text-xs flex items-center gap-1 rounded border border-blue-500/40 text-blue-400 hover:bg-blue-500/10 transition-colors"
+                                className="px-3 py-1.5 text-xs flex items-center gap-2 rounded border border-blue-500/40 text-blue-400 hover:bg-blue-500/10 transition-colors"
                                 title="Enviar cobro al terminal POS"
                               >
-                                💳 POS
+                                <CreditCard size={14} /> POS
                               </button>
                             )}
                             {booking.status === 'confirmed' && (

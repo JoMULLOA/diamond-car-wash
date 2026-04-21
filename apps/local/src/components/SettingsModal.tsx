@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
 import { useSettingsStore } from '../store';
 import type { Settings } from '../shared';
+import { X, CheckCircle } from 'lucide-react';
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -77,10 +77,10 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
           <h2 className="text-2xl font-serif font-bold text-white tracking-wider">CONFIGURACIÓN</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-white text-3xl leading-none transition-colors"
+            className="text-gray-500 hover:text-white leading-none transition-colors"
             aria-label="Cerrar"
           >
-            ×
+            <X size={24} />
           </button>
         </div>
 
@@ -256,8 +256,8 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
 
             {saved && (
               <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30 animate-fade-in">
-                <p className="text-green-400 text-sm text-center font-medium">
-                  ✓ Configuración actualizada correctamente
+                <p className="text-green-400 text-sm text-center font-medium flex items-center justify-center gap-2">
+                  <CheckCircle size={16} /> Configuración actualizada correctamente
                 </p>
               </div>
             )}

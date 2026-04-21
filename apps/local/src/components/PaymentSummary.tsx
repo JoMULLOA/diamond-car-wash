@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import type { ExitResult } from '../shared';
+import { Ticket, CreditCard } from 'lucide-react';
 
 interface PaymentSummaryProps {
   exit: ExitResult;
@@ -57,8 +57,9 @@ export function PaymentSummary({ exit, onConfirm, onCancel }: PaymentSummaryProp
         {/* Header */}
         <div className={`py-8 px-6 text-center ${isExempt ? 'bg-gradient-to-b from-purple-900/50 to-transparent' : 'bg-gradient-to-b from-yellow-900/30 to-transparent'}`}
           style={{ borderBottom: '1px solid rgba(212, 175, 55, 0.2)' }}>
-          <div className={`text-sm uppercase tracking-[0.3em] mb-2 ${isExempt ? 'text-purple-400' : 'text-yellow-500'}`}>
-            {isSubscriber ? '🎫 Suscriptor' : '💳 Resumen de Pago'}
+          <div className={`text-sm uppercase tracking-[0.3em] mb-2 flex items-center justify-center gap-2 ${isExempt ? 'text-purple-400' : 'text-yellow-500'}`}>
+            {isSubscriber ? <Ticket size={16} /> : <CreditCard size={16} />}
+            {isSubscriber ? 'Suscriptor' : 'Resumen de Pago'}
           </div>
           <h2 className="text-2xl font-serif font-bold text-white tracking-wider">
             {isExempt ? 'SALIDA CONFIRMADA' : 'TOTAL A PAGAR'}
