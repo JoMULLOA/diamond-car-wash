@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { tryNormalizePatent, getPatentType, getPatentTypeDescription, type EntryWithVehicle } from '../shared';
 import { useAppStore } from '../store';
 import { apiFetch } from '../api';

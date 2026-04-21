@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../api';
 
 interface Service {
@@ -12,6 +12,7 @@ interface Service {
   media_type: 'image' | 'video' | null;
   process: string | null;
   tools_used: string | null;
+  active: number;
 }
 import { 
   Plus, 
