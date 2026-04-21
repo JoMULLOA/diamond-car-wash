@@ -63,6 +63,7 @@ export interface MonthlyMembership {
   owner_phone: string;
   type: MembershipType;
   service_id: string | null;
+  monthly_price: number;
   washes_remaining: number;
   status: string;
   created_at: number;
