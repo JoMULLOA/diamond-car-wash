@@ -1,3 +1,5 @@
+import { useState, useEffect, useCallback } from 'react';
+import type { Booking } from '../shared';
 import { apiFetch } from '../api';
 import { 
   ChevronLeft, 

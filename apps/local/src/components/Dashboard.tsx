@@ -1,3 +1,7 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useSettingsStore } from '../store';
+import { apiFetch } from '../api';
+import type { DashboardStats } from '@diamond/shared';
 import { useNotifications } from './NotificationProvider';
 import { 
   Settings, 

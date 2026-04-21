@@ -1,4 +1,18 @@
+import { useState, useEffect } from 'react';
 import { apiFetch } from '../api';
+
+interface Service {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  duration_minutes: number;
+  max_quantity: number;
+  media_url: string | null;
+  media_type: 'image' | 'video' | null;
+  process: string | null;
+  tools_used: string | null;
+}
 import { 
   Plus, 
   Pencil, 

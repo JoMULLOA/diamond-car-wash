@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useSettingsStore } from '../store';
 import type { Settings } from '../shared';
 import { X, CheckCircle } from 'lucide-react';
