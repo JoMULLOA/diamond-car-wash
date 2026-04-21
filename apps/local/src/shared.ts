@@ -87,6 +87,7 @@ export interface Settings {
   business_name: string;
   business_address: string;
   max_capacity: number;
+  parking_membership_price: number;
   whatsapp_number?: string;
   instagram_url?: string;
   facebook_url?: string;

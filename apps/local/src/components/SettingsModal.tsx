@@ -19,12 +19,14 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     instagram_url: '',
     facebook_url: '',
     max_capacity: 50,
+    parking_membership_price: 50000,
   });
 
   // Local state for numeric inputs to allow smooth typing
   const [rateInput, setRateInput] = useState<string>(formData.rate_per_minute.toString());
   const [minFeeInput, setMinFeeInput] = useState<string>(formData.min_parking_fee.toString());
   const [capacityInput, setCapacityInput] = useState<string>((formData.max_capacity ?? 50).toString());
+  const [membershipPriceInput, setMembershipPriceInput] = useState<string>((formData.parking_membership_price ?? 50000).toString());
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -39,6 +41,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
       setRateInput(settings.rate_per_minute.toString());
       setMinFeeInput((settings.min_parking_fee ?? 100).toString());
       setCapacityInput((settings.max_capacity ?? 50).toString());
+      setMembershipPriceInput((settings.parking_membership_price ?? 50000).toString());
     }
   }, [settings]);
 
@@ -216,6 +219,33 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                   </div>
                   <p className="text-[10px] text-gray-600 mt-2 uppercase tracking-tighter">
                     Se cobra este monto si el cálculo por tiempo resulta menor. Solo aplica a estacionamientos sin membresía.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-400 uppercase tracking-wider mb-2">
+                    Precio Mensual Socio Parking (CLP)
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={membershipPriceInput}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '' || /^\d+$/.test(value)) {
+                          setMembershipPriceInput(value);
+                          const parsed = parseInt(value);
+                          setFormData({ ...formData, parking_membership_price: !isNaN(parsed) ? parsed : 0 });
+                        }
+                      }}
+                      className="input flex-1"
+                      placeholder="Ej: 50000"
+                    />
+                    <span className="text-gray-500 uppercase tracking-wider text-xs">CLP/Mes</span>
+                  </div>
+                  <p className="text-[10px] text-gray-600 mt-2 uppercase tracking-tighter">
+                    Este valor se usará como sugerencia al crear nuevos socios de estacionamiento.
                   </p>
                 </div>
               </div>

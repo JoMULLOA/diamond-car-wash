@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../api';
+import { useSettingsStore } from '../store';
 import { 
   Gem, 
   Plus, 
@@ -61,7 +62,16 @@ export function MemberManagement() {
   const [newPhone, setNewPhone] = useState('');
   const [newType, setNewType] = useState<'parking' | 'wash'>('parking');
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
-  const [manualPrice, setManualPrice] = useState<string>('50000');
+  const { settings, fetchSettings } = useSettingsStore();
+
+  const [manualPrice, setManualPrice] = useState<string>('');
+
+  // Update manualPrice when settings are loaded or when it's empty
+  useEffect(() => {
+    if (settings && !manualPrice && !editingId) {
+      setManualPrice(settings.parking_membership_price.toString());
+    }
+  }, [settings, manualPrice, editingId]);
 
   const fetchMemberships = async () => {
     try {
@@ -93,6 +103,7 @@ export function MemberManagement() {
   useEffect(() => {
     fetchMemberships();
     fetchServices();
+    fetchSettings();
   }, []);
 
   const toggleService = (serviceId: string) => {
@@ -151,7 +162,7 @@ export function MemberManagement() {
         setNewPhone('');
         setNewType('parking');
         setSelectedServiceIds([]);
-        setManualPrice('50000');
+        setManualPrice(settings?.parking_membership_price?.toString() || '50000');
         fetchMemberships();
       } else {
         alert(data.error);
@@ -168,7 +179,7 @@ export function MemberManagement() {
     setNewPhone(m.owner_phone);
     setNewType(m.type);
     setSelectedServiceIds(m.services.map(s => s.id));
-    setManualPrice(m.monthly_price ? m.monthly_price.toString() : '50000');
+    setManualPrice(m.monthly_price ? m.monthly_price.toString() : (settings?.parking_membership_price?.toString() || '50000'));
     setIsAdding(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -190,7 +201,7 @@ export function MemberManagement() {
   };
 
   const handlePayMonth = async (membership: MonthlyMembership) => {
-    const amount = membership.type === 'wash' ? membership.monthly_price : 50000;
+    const amount = membership.monthly_price;
     if (!window.confirm(`¿Confirmar pago de ${formatCurrency(amount)} para ${membership.patent}?`)) return;
     
     const d = new Date();
@@ -249,7 +260,7 @@ export function MemberManagement() {
               setNewName('');
               setNewPhone('');
               setNewType('parking');
-              setManualPrice('50000');
+              setManualPrice(settings?.parking_membership_price?.toString() || '50000');
               setSelectedServiceIds([]);
             }
           }}
@@ -390,7 +401,7 @@ export function MemberManagement() {
                 value={manualPrice}
                 onChange={(e) => setManualPrice(e.target.value)}
                 className="w-full sm:w-1/3 bg-[#0a0a0a] border border-[#d4af37]/10 rounded p-2 text-gray-200 focus:border-[#d4af37] outline-none transition-colors"
-                placeholder="50000"
+                placeholder={settings?.parking_membership_price?.toString() || "50000"}
                 min="0"
                 required
               />

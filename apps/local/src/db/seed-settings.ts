@@ -19,6 +19,7 @@ export async function seedSettings(): Promise<void> {
     { key: 'instagram_url', value: 'https://www.instagram.com/diamondcarwash.arauco/' },
     { key: 'facebook_url', value: 'https://www.facebook.com/people/DiamondcarwuashArauco/100064216656842/' },
     { key: 'max_capacity', value: '50' },
+    { key: 'parking_membership_price', value: '50000' },
   ];
 
   for (const setting of defaults) {
