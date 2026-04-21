@@ -171,7 +171,8 @@ CREATE TABLE IF NOT EXISTS monthly_memberships (
   owner_name TEXT,
   owner_phone TEXT,
   type TEXT NOT NULL DEFAULT 'parking',
-  service_id TEXT, -- Legacy, mantenido por compatibilidad selectiva
+  service_id TEXT,
+  monthly_price REAL NOT NULL DEFAULT 0,
   washes_remaining INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'active',
   created_at INTEGER NOT NULL,

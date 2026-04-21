@@ -430,6 +430,14 @@ export function ServiceManager() {
                       <span className="text-sm">✏️</span>
                       <span className="hidden sm:inline">Editar</span>
                     </button>
+                    <button
+                      onClick={() => handleDelete(service)}
+                      className="px-3 py-2 sm:py-1.5 text-xs rounded border border-red-900 text-red-500 hover:text-red-400 hover:border-red-500 transition-colors flex items-center gap-1.5"
+                      title="Eliminar"
+                    >
+                      <span className="text-sm">🗑️</span>
+                      <span className="hidden sm:inline">Eliminar</span>
+                    </button>
                   </div>
                 </div>
 

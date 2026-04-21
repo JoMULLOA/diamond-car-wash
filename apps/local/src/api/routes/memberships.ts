@@ -69,7 +69,7 @@ router.get('/', authMiddleware, async (c) => {
         services,
         service_names: services.map(s => s.name).join(', ') || null,
         total_duration: services.reduce((sum, s) => sum + s.duration_minutes, 0),
-        monthly_price: totalPrice * 3, // Paga 3, recibe 4
+        monthly_price: membership.monthly_price,
       };
     }));
     
@@ -85,7 +85,7 @@ router.get('/', authMiddleware, async (c) => {
 router.post('/', authMiddleware, async (c) => {
   try {
     const body = await c.req.json();
-    const { patent, owner_name, owner_phone, type, service_ids } = body;
+    const { patent, owner_name, owner_phone, type, service_ids, monthly_price } = body;
     
     console.log('[POST /memberships] Body received:', JSON.stringify(body));
     
@@ -132,19 +132,19 @@ router.post('/', authMiddleware, async (c) => {
       membershipId = existing.id;
       await db.run(
         `UPDATE monthly_memberships 
-         SET owner_name = ?, owner_phone = ?, type = ?, service_id = ?, washes_remaining = ?, updated_at = ? 
+         SET owner_name = ?, owner_phone = ?, type = ?, service_id = ?, monthly_price = ?, washes_remaining = ?, updated_at = ? 
          WHERE id = ?`,
-        [owner_name, owner_phone, membershipType, serviceIdList[0] || null, membershipType === 'wash' ? 4 : (existing.type === 'wash' ? 0 : existing.washes_remaining), now, existing.id]
+        [owner_name, owner_phone, membershipType, serviceIdList[0] || null, monthly_price || 0, membershipType === 'wash' ? 4 : (existing.type === 'wash' ? 0 : existing.washes_remaining), now, existing.id]
       );
-      console.log(`[POST /memberships] UPDATED member: ${normalizedPatent} to type: ${membershipType}`);
+      console.log(`[POST /memberships] UPDATED member: ${normalizedPatent} to type: ${membershipType} with price ${monthly_price}`);
     } else {
       membershipId = uuid();
       await db.run(
-        `INSERT INTO monthly_memberships (id, patent, owner_name, owner_phone, type, service_id, washes_remaining, status, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)`,
-        [membershipId, normalizedPatent, owner_name, owner_phone, membershipType, serviceIdList[0] || null, membershipType === 'wash' ? 4 : 0, now, now]
+        `INSERT INTO monthly_memberships (id, patent, owner_name, owner_phone, type, service_id, monthly_price, washes_remaining, status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)`,
+        [membershipId, normalizedPatent, owner_name, owner_phone, membershipType, serviceIdList[0] || null, monthly_price || 0, membershipType === 'wash' ? 4 : 0, now, now]
       );
-      console.log(`[POST /memberships] CREATED new member: ${normalizedPatent} as type: ${membershipType}`);
+      console.log(`[POST /memberships] CREATED new member: ${normalizedPatent} as type: ${membershipType} with price ${monthly_price}`);
     }
     
     // Sync membership_services: delete old, insert new
@@ -247,8 +247,7 @@ router.get('/check/:patent', async (c) => {
     // Get all linked services
     const services = await getMembershipServices(db, membership.id);
     const totalDuration = services.reduce((sum, s) => sum + s.duration_minutes, 0);
-    const totalPrice = services.reduce((sum, s) => sum + s.price, 0);
-    const calculatedMonthlyPrice = membership.type === 'wash' ? totalPrice * 3 : 50000;
+    const calculatedMonthlyPrice = membership.monthly_price;
     
     return c.json({ 
       exists: true, 
@@ -271,6 +270,24 @@ router.get('/check/:patent', async (c) => {
   } catch (err) {
     console.error('[GET /memberships/check/:patent]', err);
     return c.json({ error: 'Failed to check membership' }, 500);
+  }
+});
+
+// DELETE /memberships/:id - Delete a membership
+router.delete('/:id', authMiddleware, async (c) => {
+  try {
+    const membershipId = c.req.param('id');
+    const db = getDatabase();
+
+    await db.run('DELETE FROM membership_services WHERE membership_id = ?', [membershipId]);
+    await db.run('DELETE FROM monthly_payments WHERE membership_id = ?', [membershipId]);
+    await db.run('DELETE FROM monthly_memberships WHERE id = ?', [membershipId]);
+
+    console.log(`[DELETE /memberships] Deleted membership ID: ${membershipId}`);
+    return c.json({ success: true });
+  } catch (err) {
+    console.error('[DELETE /memberships]', err);
+    return c.json({ error: 'Failed to delete membership' }, 500);
   }
 });
 

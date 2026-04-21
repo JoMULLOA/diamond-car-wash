@@ -10,10 +10,10 @@ const router = new Hono();
 // Helper: Get or create vehicle by patent
 async function getOrCreateVehicle(patent: string): Promise<Vehicle> {
   const db = getDatabase();
-  
+
   // Try to find existing vehicle
   let vehicle = await db.get<Vehicle>('SELECT * FROM vehicles WHERE patent = ?', [patent]);
-  
+
   if (!vehicle) {
     // Create new vehicle
     const id = uuid();
@@ -23,10 +23,10 @@ async function getOrCreateVehicle(patent: string): Promise<Vehicle> {
        VALUES (?, ?, 'minute', ?, ?)`,
       [id, patent, now, now]
     );
-    
+
     vehicle = await db.get<Vehicle>('SELECT * FROM vehicles WHERE id = ?', [id]);
   }
-  
+
   return vehicle!;
 }
 
@@ -34,13 +34,13 @@ async function getOrCreateVehicle(patent: string): Promise<Vehicle> {
 router.post('/', async (c) => {
   try {
     const { patent } = await c.req.json();
-    
+
     // Normalize and validate patent
     const normalizedPatent = normalizePatent(patent);
-    
+
     const db = getDatabase();
     const now = Date.now();
-    
+
     // Server-side Capacity Check - Ensuring strict comparison with explicit casting
     const activeEntriesCountRow = await db.get<{ count: any }>(
       "SELECT COUNT(*) as count FROM entries WHERE status = 'active'"
@@ -49,11 +49,11 @@ router.post('/', async (c) => {
     const maxCapacity = await getMaxCapacity();
 
     if (activeEntriesCount >= maxCapacity) {
-      const errorMsg = `Capacidad máxima alcanzada (${activeEntriesCount}/${maxCapacity}). Por favor, retire un vehículo antes de registrar uno nuevo.`;
+      const errorMsg = `Capacidad máxima alcanzada (${activeEntriesCount}/${maxCapacity}). No es posible pasar, hasta que un vehículo salga.`;
       console.warn(`[POST /entries] Registration blocked: ${errorMsg}`);
       return c.json({ error: errorMsg }, 400);
     }
-    
+
     // Check for existing active entry for this patent
     const existing = await db.get<EntryWithVehicle>(
       `SELECT e.*, v.patent, v.type as vehicle_type
@@ -62,22 +62,22 @@ router.post('/', async (c) => {
        WHERE v.patent = ? AND e.status = 'active'`,
       [normalizedPatent]
     );
-    
+
     if (existing) {
-      return c.json({ 
+      return c.json({
         error: 'Vehicle already has an active entry',
-        entry: existing 
+        entry: existing
       }, 400);
     }
-    
+
     // Get or create vehicle
     const vehicle = await getOrCreateVehicle(normalizedPatent);
-    
+
     // Check if vehicle has active monthly membership paid for the current month
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
     const currentYear = currentDate.getFullYear();
-    
+
     // Instead of subscriptions_cache, use monthly_memberships + monthly_payments
     const hasPaidMembership = await db.get<{ id: string }>(
       `SELECT m.id 
@@ -90,7 +90,7 @@ router.post('/', async (c) => {
        AND p.status = 'paid'`,
       [normalizedPatent, currentMonth, currentYear]
     );
-    
+
     // Update vehicle type if has paid subscription
     if (hasPaidMembership) {
       await db.run(
@@ -106,7 +106,7 @@ router.post('/', async (c) => {
       );
       vehicle.type = 'minute';
     }
-    
+
     // Create entry
     const entryId = uuid();
     await db.run(
@@ -114,7 +114,7 @@ router.post('/', async (c) => {
        VALUES (?, ?, ?, 'active', 'local', ?, ?)`,
       [entryId, vehicle.id, now, now, now]
     );
-    
+
     const entry: EntryWithVehicle = {
       id: entryId,
       vehicle_id: vehicle.id,
@@ -126,11 +126,11 @@ router.post('/', async (c) => {
       patent: normalizedPatent,
       vehicle_type: vehicle.type,
     };
-    
+
     console.log(`[POST /entries] Registered entry for ${normalizedPatent} at ${new Date(now).toLocaleTimeString()}`);
-    
+
     return c.json({ entry }, 201);
-    
+
   } catch (err: any) {
     console.error('[POST /entries]', err);
     return c.json({ error: 'Failed to register entry' }, 500);
@@ -144,7 +144,7 @@ router.get('/fee-estimate/:id', async (c) => {
   try {
     const db = getDatabase();
     const now = Date.now();
-    
+
     // Get the entry
     const entry = await db.get<EntryWithVehicle>(
       `SELECT e.*, v.patent, v.type as vehicle_type
@@ -153,53 +153,53 @@ router.get('/fee-estimate/:id', async (c) => {
        WHERE e.id = ?`,
       [entryId]
     );
-    
+
     if (!entry) {
       return c.json({ error: 'Entry not found' }, 404);
     }
-    
+
     // Calculate duration
     const totalMs = now - entry.entry_time;
     const totalMinutes = Math.max(1, Math.ceil(totalMs / 60000));
-    
+
     // Get rate and minimum fee
     const ratePerMinute = await getRatePerMinute();
     const minParkingFee = await getMinParkingFee();
-    
+
     // Calculate amount
     let amount = 0;
     let isExemptFromParking = false;
     const isSubscription = entry.vehicle_type === 'subscription';
-    
+
     if (isSubscription) {
       // Specifically check if the membership is for parking
       const membership = await db.get<{ id: string; type: string }>(
         "SELECT id, type FROM monthly_memberships WHERE patent = ? AND status = 'active'",
         [entry.patent]
       );
-      
+
       if (membership && membership.type === 'parking') {
         const currentDate = new Date();
         const currentMonth = currentDate.getMonth() + 1;
         const currentYear = currentDate.getFullYear();
-        
+
         const payment = await db.get(
           `SELECT id FROM monthly_payments WHERE membership_id = ? AND month = ? AND year = ? AND status = 'paid'`,
           [membership.id, currentMonth, currentYear]
         );
-        
+
         if (payment) {
           isExemptFromParking = true;
         }
       }
     }
-    
+
     if (!isExemptFromParking) {
       const calculated = totalMinutes * ratePerMinute;
       // Apply minimum fee: charge whichever is greater
       amount = Math.max(calculated, minParkingFee);
     }
-    
+
     const result: ExitResult = {
       entry_id: entryId,
       patent: entry.patent,
@@ -210,9 +210,9 @@ router.get('/fee-estimate/:id', async (c) => {
       amount,
       was_subscription: isSubscription,
     };
-    
+
     return c.json({ estimate: result });
-    
+
   } catch (err) {
     console.error('[GET /entries/:id/estimate]', err);
     return c.json({ error: 'Failed to calculate estimate' }, 500);
@@ -223,7 +223,7 @@ router.get('/fee-estimate/:id', async (c) => {
 router.put('/:id/exit', async (c) => {
   const entryId = c.req.param('id');
   console.log(`[BACKEND] >> ATTEMPTING FINAL CLOSURE for ID: ${entryId}`);
-  
+
   try {
     let body;
     try {
@@ -234,7 +234,7 @@ router.put('/:id/exit', async (c) => {
     }
 
     const { amount, total_minutes, exit_time } = body;
-    
+
     if (amount === undefined || total_minutes === undefined) {
       console.error(`[BACKEND] >> Missing required fields for ID: ${entryId}`);
       return c.json({ error: 'Datos de pago incompletos' }, 400);
@@ -244,7 +244,7 @@ router.put('/:id/exit', async (c) => {
     const now = Date.now();
     const finalExitTime = exit_time || now;
     const ratePerMinute = await getRatePerMinute();
-    
+
     // Check if already closed
     const entry = await db.get<Entry>('SELECT status FROM entries WHERE id = ?', [entryId]);
     if (!entry) return c.json({ error: 'Entrada no encontrada' }, 404);
@@ -257,7 +257,7 @@ router.put('/:id/exit', async (c) => {
        WHERE id = ?`,
       [finalExitTime, total_minutes, now, entryId]
     );
-    
+
     // Create payment record
     const paymentId = uuid();
     await db.run(
@@ -265,14 +265,14 @@ router.put('/:id/exit', async (c) => {
        VALUES (?, ?, ?, ?, ?)`,
       [paymentId, entryId, amount, ratePerMinute, finalExitTime]
     );
-    
+
     console.log(`[PUT /entries/${entryId}/exit] Finalized: $${amount}`);
-    
-    return c.json({ 
+
+    return c.json({
       success: true,
       payment_id: paymentId,
     });
-    
+
   } catch (err) {
     console.error('[PUT /entries/:id/exit]', err);
     return c.json({ error: 'Failed to process exit' }, 500);
@@ -283,7 +283,7 @@ router.put('/:id/exit', async (c) => {
 router.get('/active', async (c) => {
   try {
     const db = getDatabase();
-    
+
     const entries = await db.all<EntryWithVehicle>(
       `SELECT e.*, v.patent, v.type as vehicle_type
        FROM entries e
@@ -291,7 +291,7 @@ router.get('/active', async (c) => {
        WHERE e.status = 'active'
        ORDER BY e.entry_time ASC`
     );
-    
+
     // Add elapsed time
     const now = Date.now();
     const entriesWithElapsed = entries.map(entry => ({
@@ -299,9 +299,9 @@ router.get('/active', async (c) => {
       elapsed_minutes: Math.max(1, Math.ceil((now - entry.entry_time) / 60000)),
       elapsed_ms: now - entry.entry_time,
     }));
-    
+
     return c.json({ entries: entriesWithElapsed });
-    
+
   } catch (err) {
     console.error('[GET /entries/active]', err);
     return c.json({ error: 'Failed to fetch active entries' }, 500);
@@ -313,7 +313,7 @@ router.get('/:id', async (c) => {
   try {
     const entryId = c.req.param('id');
     const db = getDatabase();
-    
+
     const entry = await db.get<EntryWithVehicle>(
       `SELECT e.*, v.patent, v.type as vehicle_type
        FROM entries e
@@ -321,13 +321,13 @@ router.get('/:id', async (c) => {
        WHERE e.id = ?`,
       [entryId]
     );
-    
+
     if (!entry) {
       return c.json({ error: 'Entry not found' }, 404);
     }
-    
+
     return c.json({ entry });
-    
+
   } catch (err) {
     console.error('[GET /entries/:id]', err);
     return c.json({ error: 'Failed to fetch entry' }, 500);

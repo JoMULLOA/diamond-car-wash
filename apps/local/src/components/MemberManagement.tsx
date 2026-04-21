@@ -42,11 +42,13 @@ export function MemberManagement() {
   const [patentFilter, setPatentFilter] = useState('');
   
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [newPatent, setNewPatent] = useState('');
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newType, setNewType] = useState<'parking' | 'wash'>('parking');
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
+  const [manualPrice, setManualPrice] = useState<string>('50000');
 
   const fetchMemberships = async () => {
     try {
@@ -111,11 +113,13 @@ export function MemberManagement() {
     
     try {
       const payload = {
+        id: editingId,
         patent: newPatent,
         owner_name: newName,
         owner_phone: newPhone,
         type: newType,
-        service_ids: newType === 'wash' ? selectedServiceIds : []
+        service_ids: newType === 'wash' ? selectedServiceIds : [],
+        monthly_price: newType === 'wash' ? monthlyPrice : parseInt(manualPrice) || 0
       };
       
       console.log('[MemberManagement] Sending:', JSON.stringify(payload));
@@ -128,17 +132,47 @@ export function MemberManagement() {
       const data = await res.json();
       if (res.ok) {
         setIsAdding(false);
+        setEditingId(null);
         setNewPatent('');
         setNewName('');
         setNewPhone('');
         setNewType('parking');
         setSelectedServiceIds([]);
+        setManualPrice('50000');
         fetchMemberships();
       } else {
         alert(data.error);
       }
     } catch (err) {
-      alert('Error agregando socio.');
+      alert('Error guardando socio.');
+    }
+  };
+
+  const handleEdit = (m: MonthlyMembership) => {
+    setEditingId(m.id);
+    setNewPatent(m.patent);
+    setNewName(m.owner_name);
+    setNewPhone(m.owner_phone);
+    setNewType(m.type);
+    setSelectedServiceIds(m.services.map(s => s.id));
+    setManualPrice(m.monthly_price ? m.monthly_price.toString() : '50000');
+    setIsAdding(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (m: MonthlyMembership) => {
+    if (!window.confirm(`¿Estás seguro de que querés eliminar al socio ${m.owner_name} (${m.patent})? Esto borrará también el historial de pagos.`)) return;
+    
+    try {
+      const res = await apiFetch(`/api/memberships/${m.id}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchMemberships();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Error al eliminar');
+      }
+    } catch (err) {
+      alert('Error de conexión.');
     }
   };
 
@@ -188,7 +222,24 @@ export function MemberManagement() {
           <p className="text-gray-400 text-sm mt-1">Gestión de socios y mensualidades</p>
         </div>
         <button
-          onClick={() => setIsAdding(!isAdding)}
+          onClick={() => {
+            if (isAdding) {
+              setIsAdding(false);
+              setEditingId(null);
+              setNewPatent('');
+              setNewName('');
+              setNewPhone('');
+            } else {
+              setIsAdding(true);
+              setEditingId(null);
+              setNewPatent('');
+              setNewName('');
+              setNewPhone('');
+              setNewType('parking');
+              setManualPrice('50000');
+              setSelectedServiceIds([]);
+            }
+          }}
           className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded transition-colors"
         >
           {isAdding ? 'Cancelar' : '+ Nuevo Socio'}
@@ -239,7 +290,7 @@ export function MemberManagement() {
 
       {isAdding && (
         <form onSubmit={handleAddSubmit} className="bg-[#141414] p-6 rounded-lg border border-[#d4af37]/20">
-          <h3 className="text-lg font-medium text-gray-200 mb-4">Agregar Nuevo Socio</h3>
+          <h3 className="text-lg font-medium text-gray-200 mb-4">{editingId ? 'Editar Socio' : 'Agregar Nuevo Socio'}</h3>
           
           {/* Membership Type Selection */}
           <div className="grid grid-cols-2 gap-3 mb-6">
@@ -310,6 +361,22 @@ export function MemberManagement() {
               />
             </div>
           </div>
+
+          {newType === 'parking' && (
+            <div className="mt-4">
+              <label className="block text-gray-400 text-xs uppercase mb-1">Precio Mensual de Estacionamiento ($)</label>
+              <input
+                type="number"
+                value={manualPrice}
+                onChange={(e) => setManualPrice(e.target.value)}
+                className="w-full sm:w-1/3 bg-[#0a0a0a] border border-[#d4af37]/10 rounded p-2 text-gray-200 focus:border-[#d4af37] outline-none transition-colors"
+                placeholder="50000"
+                min="0"
+                required
+              />
+              <p className="text-[10px] text-gray-500 mt-1">Este será el monto que se le cobrará cada mes.</p>
+            </div>
+          )}
 
           {/* Multi-Service Selection (only for wash type) */}
           {newType === 'wash' && (
@@ -458,11 +525,31 @@ export function MemberManagement() {
                       onClick={() => handlePayMonth(m)}
                       className="text-yellow-500 hover:text-yellow-400 text-xs sm:text-sm font-bold transition-all border border-yellow-500/50 hover:border-yellow-400 px-4 py-2 rounded bg-yellow-500/10 hover:bg-yellow-500/20 shadow-[0_0_15px_rgba(212,175,55,0.15)] whitespace-nowrap"
                     >
-                      {m.type === 'wash' ? `Cobrar ${formatCurrency(m.monthly_price)}` : 'Registrar Pago'}
+                      {`Cobrar ${formatCurrency(m.monthly_price)}`}
                     </button>
                   ) : (
-                    <span className="text-gray-600 text-[10px] sm:text-xs uppercase tracking-widest font-bold">Mes Pagado</span>
+                    <div className="flex flex-col items-end">
+                      <span className="text-gray-600 text-[10px] sm:text-xs uppercase tracking-widest font-bold">Mes Pagado</span>
+                      <span className="text-gray-500 text-xs">({formatCurrency(m.monthly_price)})</span>
+                    </div>
                   )}
+                </div>
+                {/* Action Buttons (Edit / Delete) */}
+                <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                  <button
+                    onClick={() => handleEdit(m)}
+                    className="text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 px-2 py-1 rounded text-xs transition-colors"
+                    title="Editar Socio"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    onClick={() => handleDelete(m)}
+                    className="text-red-500 hover:text-red-400 border border-red-900 hover:border-red-500 px-2 py-1 rounded text-xs transition-colors"
+                    title="Eliminar Socio"
+                  >
+                    🗑️
+                  </button>
                 </div>
               </div>
 
