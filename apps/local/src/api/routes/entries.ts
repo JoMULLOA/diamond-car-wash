@@ -4,6 +4,7 @@ import { getRatePerMinute, getMinParkingFee, getMaxCapacity } from '../../db/see
 import { normalizePatent } from '../../constants';
 import { v4 as uuid } from 'uuid';
 import type { Entry, Vehicle, EntryWithVehicle, ExitResult } from '../../constants';
+import { TuuProvider } from '../services/payment/TuuProvider';
 
 const router = new Hono();
 
@@ -233,11 +234,17 @@ router.put('/:id/exit', async (c) => {
       return c.json({ error: 'Cuerpo de petición inválido o vacío' }, 400);
     }
 
-    const { amount, total_minutes, exit_time } = body;
+    const { amount, total_minutes, exit_time, payment_method = 'cash' } = body;
 
     if (amount === undefined || total_minutes === undefined) {
       console.error(`[BACKEND] >> Missing required fields for ID: ${entryId}`);
       return c.json({ error: 'Datos de pago incompletos' }, 400);
+    }
+
+    // Validate payment_method
+    const validMethods = ['cash', 'pos', 'web'];
+    if (!validMethods.includes(payment_method)) {
+      return c.json({ error: 'Método de pago inválido. Use: cash, pos o web' }, 400);
     }
 
     const db = getDatabase();
@@ -250,6 +257,18 @@ router.put('/:id/exit', async (c) => {
     if (!entry) return c.json({ error: 'Entrada no encontrada' }, 404);
     if (entry.status === 'closed') return c.json({ error: 'La entrada ya está cerrada' }, 400);
 
+    // If POS, trigger TUU terminal and wait for confirmation
+    if (payment_method === 'pos' && amount > 0) {
+      const apiKey = (await db.get<{ value: string }>("SELECT value FROM settings WHERE key = 'mercado_pago_access_token'"))?.value;
+      const tuuProvider = new TuuProvider(apiKey || '');
+      console.log(`[PUT /entries/${entryId}/exit] Triggering POS for $${amount}...`);
+      const posSuccess = await tuuProvider.triggerRemotePayment({ id: entryId, amount });
+      if (!posSuccess) {
+        return c.json({ error: 'El terminal POS no pudo procesar el pago. Intente nuevamente.' }, 500);
+      }
+      console.log(`[PUT /entries/${entryId}/exit] POS confirmed payment of $${amount}`);
+    }
+
     // Update entry to closed
     await db.run(
       `UPDATE entries 
@@ -258,19 +277,20 @@ router.put('/:id/exit', async (c) => {
       [finalExitTime, total_minutes, now, entryId]
     );
 
-    // Create payment record
+    // Create payment record with method
     const paymentId = uuid();
     await db.run(
-      `INSERT INTO payments (id, entry_id, amount, rate_per_minute, payment_time)
-       VALUES (?, ?, ?, ?, ?)`,
-      [paymentId, entryId, amount, ratePerMinute, finalExitTime]
+      `INSERT INTO payments (id, entry_id, amount, rate_per_minute, payment_time, payment_method)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [paymentId, entryId, amount, ratePerMinute, finalExitTime, payment_method]
     );
 
-    console.log(`[PUT /entries/${entryId}/exit] Finalized: $${amount}`);
+    console.log(`[PUT /entries/${entryId}/exit] Finalized: $${amount} via ${payment_method}`);
 
     return c.json({
       success: true,
       payment_id: paymentId,
+      payment_method,
     });
 
   } catch (err) {

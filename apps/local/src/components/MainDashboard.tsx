@@ -10,6 +10,7 @@ import { ServiceManager } from './ServiceManager';
 import { Agenda } from './Agenda';
 import { MemberManagement } from './MemberManagement';
 import { Login } from './Login';
+import { CashFlow } from './CashFlow';
 import { useAppStore, useSettingsStore, useAuthStore } from '../store';
 import { apiFetch } from '../api';
 import { NotificationProvider, useNotifications } from './NotificationProvider';
@@ -23,10 +24,11 @@ import {
   Gem, 
   HelpCircle, 
   LogOut,
-  Keyboard
+  Keyboard,
+  TrendingUp
 } from 'lucide-react';
 
-type Tab = 'dashboard' | 'entry' | 'active' | 'history' | 'agenda' | 'services' | 'memberships';
+type Tab = 'dashboard' | 'entry' | 'active' | 'history' | 'agenda' | 'services' | 'memberships' | 'cashflow';
 
 export function MainDashboard() {
   const { isAuthenticated } = useAuthStore();
@@ -117,7 +119,7 @@ function MainDashboardContent() {
     notify('Ingreso registrado con éxito', 'success');
   };
 
-  const handlePaymentConfirm = async () => {
+  const handlePaymentConfirm = async (method: 'cash' | 'pos') => {
     if (!currentPayment) return;
 
     try {
@@ -127,7 +129,8 @@ function MainDashboardContent() {
         body: JSON.stringify({
           amount: currentPayment.amount,
           total_minutes: currentPayment.total_minutes,
-          exit_time: currentPayment.exit_time
+          exit_time: currentPayment.exit_time,
+          payment_method: method,
         })
       });
 
@@ -138,7 +141,8 @@ function MainDashboardContent() {
         await fetchStats();
         setCurrentPayment(null);
         window.dispatchEvent(new CustomEvent('entry-success'));
-        notify('Pago procesado correctamente', 'success');
+        const methodLabel = method === 'pos' ? 'Tarjeta (POS)' : 'Efectivo';
+        notify(`Pago procesado correctamente (${methodLabel})`, 'success');
       } else {
         notify(data.error || 'Error al procesar el pago', 'error');
       }
@@ -166,6 +170,7 @@ function MainDashboardContent() {
     { key: 'agenda', label: 'Agenda', icon: <Calendar size={18} /> },
     { key: 'services', label: 'Servicios', icon: <Sparkles size={18} /> },
     { key: 'memberships', label: 'VIP', icon: <Gem size={18} /> },
+    { key: 'cashflow', label: 'Finanzas', icon: <TrendingUp size={18} /> },
   ];
 
   return (
@@ -276,6 +281,9 @@ function MainDashboardContent() {
         )}
         {activeTab === 'memberships' && (
           <MemberManagement />
+        )}
+        {activeTab === 'cashflow' && (
+          <CashFlow />
         )}
       </main>
 

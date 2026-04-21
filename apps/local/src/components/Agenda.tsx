@@ -9,6 +9,7 @@ import {
   CheckCircle,
   Clock,
   Banknote,
+  Wifi,
   XCircle,
   AlertCircle
 } from 'lucide-react';
@@ -72,6 +73,24 @@ export function Agenda() {
       }
     } catch (err) {
       alert('Error de conexión');
+    }
+  };
+
+  const handleChargeLocal = async (bookingId: string, method: 'cash' | 'pos') => {
+    try {
+      const res = await apiFetch(`/api/bookings/${bookingId}/charge-local`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_method: method }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        await fetchBookings();
+      } else {
+        alert(data.error || 'Error al cobrar');
+      }
+    } catch (err) {
+      alert('Error de conexión al cobrar');
     }
   };
 
@@ -323,15 +342,24 @@ export function Agenda() {
                                 Confirmar Web
                               </button>
                             )}
-                            {/* TUU POS INTEGRATION */}
+                            {/* Local payment: Cash or POS */}
                             {(booking.remaining_balance > 0 || booking.status === 'pending_payment') && booking.status !== 'cancelled' && (
-                              <button
-                                onClick={() => handleAction(booking.id, 'tuu-remote')}
-                                className="px-3 py-1.5 text-xs flex items-center gap-2 rounded border border-blue-500/40 text-blue-400 hover:bg-blue-500/10 transition-colors"
-                                title="Enviar cobro al terminal POS"
-                              >
-                                <CreditCard size={14} /> POS
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => handleChargeLocal(booking.id, 'cash')}
+                                  className="px-3 py-1.5 text-xs flex items-center gap-1.5 rounded border border-green-500/40 text-green-400 hover:bg-green-500/10 transition-colors"
+                                  title="Cobrar saldo en efectivo"
+                                >
+                                  <Banknote size={13} /> Efectivo
+                                </button>
+                                <button
+                                  onClick={() => handleChargeLocal(booking.id, 'pos')}
+                                  className="px-3 py-1.5 text-xs flex items-center gap-1.5 rounded border border-blue-500/40 text-blue-400 hover:bg-blue-500/10 transition-colors"
+                                  title="Cobrar saldo con terminal POS"
+                                >
+                                  <Wifi size={13} /> POS
+                                </button>
+                              </>
                             )}
                             {booking.status === 'confirmed' && (
                               <>

@@ -462,7 +462,67 @@ router.put('/:id/confirm', async (c) => {
   }
 });
 
-// PUT /bookings/:id/tuu-remote - Trigger POS payment form Agenda
+// PUT /bookings/:id/charge-local - Charge remaining balance locally (cash or POS)
+// This replaces tuu-remote and adds payment_method support
+router.put('/:id/charge-local', authMiddleware, async (c) => {
+  try {
+    const id = c.req.param('id');
+    const db = getDatabase();
+    const body = await c.req.json().catch(() => ({}));
+    const payment_method: string = (body as any).payment_method || 'cash';
+
+    const validMethods = ['cash', 'pos'];
+    if (!validMethods.includes(payment_method)) {
+      return c.json({ error: 'Método de pago inválido para cobro local. Use: cash o pos' }, 400);
+    }
+
+    const booking = await db.get<Booking>('SELECT * FROM bookings WHERE id = ?', [id]);
+    if (!booking) return c.json({ error: 'Reserva no encontrada' }, 404);
+
+    if (booking.status === 'cancelled') {
+      return c.json({ error: 'La reserva está cancelada' }, 400);
+    }
+
+    const amountToCharge = booking.remaining_balance > 0 ? booking.remaining_balance : booking.total_amount;
+    
+    if (amountToCharge <= 0) {
+      // No balance pending, just mark as completed
+      await db.run(
+        `UPDATE bookings SET status = 'completed', final_payment_method = ?, updated_at = ? WHERE id = ?`,
+        [payment_method, Date.now(), id]
+      );
+      return c.json({ success: true, status: 'completed', payment_method });
+    }
+
+    if (payment_method === 'pos') {
+      const apiKey = (await db.get<{ value: string }>("SELECT value FROM settings WHERE key = 'mercado_pago_access_token'"))?.value;
+      const tuuProvider = new TuuProvider(apiKey || '');
+      console.log(`[charge-local] Triggering POS for $${amountToCharge} on booking ${id}...`);
+      const success = await tuuProvider.triggerRemotePayment({ id: booking.id, amount: amountToCharge });
+      if (!success) {
+        return c.json({ error: 'El terminal POS no pudo procesar el pago. Intente nuevamente.' }, 500);
+      }
+      console.log(`[charge-local] POS confirmed $${amountToCharge}`);
+    }
+
+    // Record the local payment and complete the booking
+    await db.run(
+      `UPDATE bookings 
+       SET status = 'completed', paid_amount = ?, remaining_balance = 0, final_payment_method = ?, updated_at = ?
+       WHERE id = ?`,
+      [booking.total_amount, payment_method, Date.now(), id]
+    );
+
+    console.log(`[charge-local] Booking ${id} completed via ${payment_method} for $${amountToCharge}`);
+    return c.json({ success: true, status: 'completed', payment_method, amount_charged: amountToCharge });
+
+  } catch (err) {
+    console.error('[PUT /bookings/:id/charge-local]', err);
+    return c.json({ error: 'Failed to process local payment' }, 500);
+  }
+});
+
+// PUT /bookings/:id/tuu-remote - Legacy: Trigger POS payment from Agenda (kept for backward compat)
 router.put('/:id/tuu-remote', authMiddleware, async (c) => {
   try {
     const id = c.req.param('id');
@@ -483,10 +543,9 @@ router.put('/:id/tuu-remote', authMiddleware, async (c) => {
 
     const apiKey = (await db.get<{ value: string }>("SELECT value FROM settings WHERE key = 'mercado_pago_access_token'"))?.value;
     if (!apiKey) {
-      // Allow simulation if no API key is provided
       console.log('[TUU Remote] Simulando cobro exitoso SIN llave API configurada...');
       await db.run(
-        `UPDATE bookings SET status = 'completed', paid_amount = ?, remaining_balance = 0, updated_at = ? WHERE id = ?`,
+        `UPDATE bookings SET status = 'completed', paid_amount = ?, remaining_balance = 0, final_payment_method = 'pos', updated_at = ? WHERE id = ?`,
         [booking.total_amount, Date.now(), id]
       );
       return c.json({ success: true, status: 'completed' });
@@ -501,10 +560,8 @@ router.put('/:id/tuu-remote', authMiddleware, async (c) => {
     });
 
     if (success) {
-      // Assuming synchronous success or we listen to webhooks. Haulmer POS endpoints can block or return immediatley depending on implementation.
-      // If we assume it returns success when printed:
       await db.run(
-        `UPDATE bookings SET status = 'completed', paid_amount = ?, remaining_balance = 0, updated_at = ? WHERE id = ?`,
+        `UPDATE bookings SET status = 'completed', paid_amount = ?, remaining_balance = 0, final_payment_method = 'pos', updated_at = ? WHERE id = ?`,
         [booking.total_amount, Date.now(), id]
       );
       return c.json({ success: true, status: 'completed' });

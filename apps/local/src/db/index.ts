@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS payments (
   amount REAL NOT NULL,
   rate_per_minute REAL NOT NULL,
   payment_time INTEGER NOT NULL,
+  payment_method TEXT NOT NULL DEFAULT 'cash',
   FOREIGN KEY (entry_id) REFERENCES entries(id)
 );
 
@@ -148,6 +149,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   remaining_balance REAL NOT NULL DEFAULT 0,
   payment_option TEXT NOT NULL DEFAULT '100',
   mercado_pago_id TEXT,
+  final_payment_method TEXT,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL,
   FOREIGN KEY (service_id) REFERENCES services(id)
@@ -189,6 +191,7 @@ CREATE TABLE IF NOT EXISTS monthly_payments (
   year INTEGER NOT NULL,
   amount REAL NOT NULL,
   status TEXT NOT NULL DEFAULT 'paid',
+  payment_method TEXT NOT NULL DEFAULT 'cash',
   paid_at INTEGER,
   created_at INTEGER NOT NULL,
   FOREIGN KEY (membership_id) REFERENCES monthly_memberships(id)

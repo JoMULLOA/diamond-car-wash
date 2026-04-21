@@ -3,6 +3,7 @@ import { getDatabase } from '../../db/index';
 import { normalizePatent } from '../../constants';
 import { v4 as uuid } from 'uuid';
 import { authMiddleware } from './auth';
+import { TuuProvider } from '../services/payment/TuuProvider';
 import type { MonthlyMembership, MonthlyPayment, Service } from '../../shared';
 
 const router = new Hono();
@@ -170,10 +171,16 @@ router.post('/', authMiddleware, async (c) => {
 router.post('/pay', async (c) => {
   try {
     const body = await c.req.json();
-    const { membership_id, month, year, amount } = body;
+    const { membership_id, month, year, amount, payment_method = 'cash' } = body;
     
     if (!membership_id || !month || !year || amount === undefined) {
       return c.json({ error: 'Missing required fields' }, 400);
+    }
+
+    // Validate payment_method
+    const validMethods = ['cash', 'pos', 'web'];
+    if (!validMethods.includes(payment_method)) {
+      return c.json({ error: 'Método de pago inválido. Use: cash, pos o web' }, 400);
     }
     
     const db = getDatabase();
@@ -188,6 +195,18 @@ router.post('/pay', async (c) => {
     if (!membership) {
       return c.json({ error: 'Membership not found' }, 404);
     }
+
+    // If POS, trigger TUU terminal and wait for confirmation
+    if (payment_method === 'pos' && amount > 0) {
+      const apiKey = (await db.get<{ value: string }>("SELECT value FROM settings WHERE key = 'mercado_pago_access_token'"))?.value;
+      const tuuProvider = new TuuProvider(apiKey || '');
+      console.log(`[POST /memberships/pay] Triggering POS for $${amount} (membership: ${membership_id})...`);
+      const posSuccess = await tuuProvider.triggerRemotePayment({ id: `membership_${id}`, amount });
+      if (!posSuccess) {
+        return c.json({ error: 'El terminal POS no pudo procesar el pago. Intente nuevamente.' }, 500);
+      }
+      console.log(`[POST /memberships/pay] POS confirmed payment of $${amount}`);
+    }
     
     // Delete any existing payment for this exact month
     await db.run(
@@ -196,9 +215,9 @@ router.post('/pay', async (c) => {
     );
     
     await db.run(
-      `INSERT INTO monthly_payments (id, membership_id, month, year, amount, status, paid_at, created_at)
-       VALUES (?, ?, ?, ?, ?, 'paid', ?, ?)`,
-      [id, membership_id, month, year, amount, now, now]
+      `INSERT INTO monthly_payments (id, membership_id, month, year, amount, status, payment_method, paid_at, created_at)
+       VALUES (?, ?, ?, ?, ?, 'paid', ?, ?, ?)`,
+      [id, membership_id, month, year, amount, payment_method, now, now]
     );
     
     // If wash membership, reset washes_remaining to 4
@@ -210,7 +229,7 @@ router.post('/pay', async (c) => {
       console.log(`[POST /memberships/pay] Wash member ${membership.patent}: credits reset to 4`);
     }
     
-    return c.json({ success: true, payment_id: id });
+    return c.json({ success: true, payment_id: id, payment_method });
     
   } catch (err) {
     console.error('[POST /memberships/pay]', err);
