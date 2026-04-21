@@ -26,6 +26,7 @@ router.get('/', async (c) => {
         whatsapp_number: settings.whatsapp_number || '',
         instagram_url: settings.instagram_url || '',
         facebook_url: settings.facebook_url || '',
+        max_capacity: parseInt(settings.max_capacity || '50', 10),
       }
     });
     
@@ -77,14 +78,23 @@ router.put('/', async (c) => {
     if (updates.facebook_url !== undefined) {
       setSetting('facebook_url', updates.facebook_url);
     }
+
+    if (updates.max_capacity !== undefined) {
+      const cap = parseInt(String(updates.max_capacity), 10);
+      if (!isNaN(cap) && cap >= 0) {
+        setSetting('max_capacity', String(cap));
+      }
+    }
     
     // Return updated settings
     const db = getDatabase();
     const rows = await db.all<{ key: string; value: string }>('SELECT key, value FROM settings');
     const settings: Record<string, any> = {};
     for (const row of rows) {
-      if (row.key === 'rate_per_minute') {
+      if (row.key === 'rate_per_minute' || row.key === 'min_parking_fee') {
         settings[row.key] = parseFloat(row.value);
+      } else if (row.key === 'max_capacity') {
+        settings[row.key] = parseInt(row.value, 10);
       } else {
         settings[row.key] = row.value;
       }
