@@ -27,6 +27,7 @@ router.get('/', async (c) => {
         instagram_url: settings.instagram_url || '',
         facebook_url: settings.facebook_url || '',
         max_capacity: parseInt(settings.max_capacity || '50', 10),
+        parking_membership_price: parseFloat(settings.parking_membership_price || '50000'),
       }
     });
     
@@ -85,14 +86,22 @@ router.put('/', async (c) => {
         setSetting('max_capacity', String(cap));
       }
     }
+
+    if (updates.parking_membership_price !== undefined) {
+      const price = parseFloat(updates.parking_membership_price);
+      if (!isNaN(price) && price >= 0) {
+        setSetting('parking_membership_price', String(price));
+      }
+    }
     
     // Return updated settings
     const db = getDatabase();
     const rows = await db.all<{ key: string; value: string }>('SELECT key, value FROM settings');
     const settings: Record<string, any> = {};
     for (const row of rows) {
-      if (row.key === 'rate_per_minute' || row.key === 'min_parking_fee') {
-        settings[row.key] = parseFloat(row.value);
+      const numValue = parseFloat(row.value);
+      if (row.key === 'rate_per_minute' || row.key === 'min_parking_fee' || row.key === 'parking_membership_price') {
+        settings[row.key] = numValue;
       } else if (row.key === 'max_capacity') {
         settings[row.key] = parseInt(row.value, 10);
       } else {

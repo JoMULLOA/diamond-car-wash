@@ -69,7 +69,7 @@ export function MemberManagement() {
   // Update manualPrice when settings are loaded or when it's empty
   useEffect(() => {
     if (settings && !manualPrice && !editingId) {
-      setManualPrice(settings.parking_membership_price.toString());
+      setManualPrice(settings.parking_membership_price?.toString() || '50000');
     }
   }, [settings, manualPrice, editingId]);
 
