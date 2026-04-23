@@ -253,6 +253,29 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
 
             <div className="pt-4 border-t border-gray-800">
               <h3 className="text-sm text-yellow-500 uppercase tracking-widest mb-4 font-serif">
+                Integración de Pagos (TUU)
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-gray-400 uppercase tracking-wider mb-2">
+                    TUU API Key (Sandbox o Producción)
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.tuu_api_key || ''}
+                    onChange={(e) => setFormData({ ...formData, tuu_api_key: e.target.value })}
+                    className="input font-mono text-sm"
+                    placeholder="Tus llaves de Haulmer/TUU"
+                  />
+                  <p className="text-[10px] text-gray-600 mt-2 uppercase tracking-tighter">
+                    Si dejas este campo vacío, el sistema funcionará en modo simulado (Mock). No compartas esta llave con nadie.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-gray-800">
+              <h3 className="text-sm text-yellow-500 uppercase tracking-widest mb-4 font-serif">
                 Capacidad e Inventario
               </h3>
               <div className="space-y-4">

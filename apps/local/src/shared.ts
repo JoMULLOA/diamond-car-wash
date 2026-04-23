@@ -91,6 +91,8 @@ export interface Settings {
   whatsapp_number?: string;
   instagram_url?: string;
   facebook_url?: string;
+  tuu_api_key?: string;
+  mercado_pago_access_token?: string;
 }
 
 export interface EntryWithVehicle extends Entry {

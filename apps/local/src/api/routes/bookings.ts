@@ -154,11 +154,15 @@ router.get('/availability', async (c) => {
     closeHour = '18:00';
 
     // Get existing bookings for that date (non-cancelled)
+    // We ignore bookings that are 'pending_payment' AND have expired
+    const nowTimestamp = Date.now();
     const existingBookings = await db.all<Booking>(
       `SELECT * FROM bookings
-       WHERE booking_date = ? AND status NOT IN ('cancelled')
+       WHERE booking_date = ? 
+       AND status NOT IN ('cancelled')
+       AND NOT (status = 'pending_payment' AND payment_expires_at < ?)
        ORDER BY start_time ASC`,
-      [date]
+      [date, nowTimestamp]
     );
 
     // Generate all possible slots
@@ -335,15 +339,16 @@ router.post('/', async (c) => {
     
     // Initial balances (remaining balance is only accurate AFTER payment online is confirmed, but we set the expected here)
     const expectedRemaining = isSubBooking ? 0 : (totalPrice - amountToCharge);
+    const paymentExpiresAt = isSubBooking ? null : (now + 15 * 60 * 1000); // 15 minutes to pay
 
     await db.run(
       `INSERT INTO bookings (id, service_id, client_name, client_phone, client_patent,
         booking_date, start_time, end_time, status, deposit_amount, total_amount,
-        paid_amount, remaining_balance, payment_option, mercado_pago_id, notes, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?)`,
+        paid_amount, remaining_balance, payment_option, mercado_pago_id, payment_expires_at, notes, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?)`,
       [id, finalCart[0].id, client_name, client_phone, normalizedPatent,
        booking_date, start_time, endTime, initialStatus, depositAmount, totalPrice,
-       0, totalPrice, payment_option, bookingNotes, now, now]
+       0, totalPrice, payment_option, paymentExpiresAt, bookingNotes, now, now]
     );
 
     for (const item of finalCart) {
@@ -371,7 +376,8 @@ router.post('/', async (c) => {
     let initPoint = null;
     if (!isSubBooking) {
       // Reusing the MP token column temporarily until dashboard is updated to say "TUU API Key"
-      const apiKey = (await db.get<{ value: string }>("SELECT value FROM settings WHERE key = 'mercado_pago_access_token'"))?.value;
+      const apiKey = (await db.get<{ value: string }>("SELECT value FROM settings WHERE key = 'tuu_api_key'"))?.value
+        || (await db.get<{ value: string }>("SELECT value FROM settings WHERE key = 'mercado_pago_access_token'"))?.value;
       
       if (apiKey && amountToCharge > 0) {
         console.log('[POST /bookings] Generando checkout de TUU online...');

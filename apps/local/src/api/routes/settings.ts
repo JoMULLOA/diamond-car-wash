@@ -28,6 +28,8 @@ router.get('/', async (c) => {
         facebook_url: settings.facebook_url || '',
         max_capacity: parseInt(settings.max_capacity || '50', 10),
         parking_membership_price: parseFloat(settings.parking_membership_price || '50000'),
+        tuu_api_key: settings.tuu_api_key || '',
+        mercado_pago_access_token: settings.mercado_pago_access_token || settings.tuu_api_key || '',
       }
     });
     
@@ -92,6 +94,14 @@ router.put('/', async (c) => {
       if (!isNaN(price) && price >= 0) {
         setSetting('parking_membership_price', String(price));
       }
+    }
+
+    if (updates.tuu_api_key !== undefined) {
+      setSetting('tuu_api_key', updates.tuu_api_key);
+    }
+
+    if (updates.mercado_pago_access_token !== undefined) {
+      setSetting('mercado_pago_access_token', updates.mercado_pago_access_token);
     }
     
     // Return updated settings
