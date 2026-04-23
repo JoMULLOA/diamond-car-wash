@@ -32,6 +32,11 @@ export default function MensualidadPage() {
       const data = await res.json();
 
       if (res.ok) {
+        if (data.exists && data.membership?.type !== 'parking') {
+          setError('Esta patente pertenece al Club de Lavado. Por favor, ingresa por el portal correspondiente.');
+          setResult(null);
+          return;
+        }
         setResult(data);
       } else {
         setError(data.error || 'Error al consultar la patente');
@@ -43,9 +48,46 @@ export default function MensualidadPage() {
     }
   };
 
+  const handlePayMonthly = async () => {
+    if (!result?.membership) return;
+    setLoading(true);
+    try {
+      const res = await fetch('/api/memberships/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          membership_id: result.membership.id,
+          month: result.current_month,
+          year: result.current_year,
+          amount: result.monthly_price,
+          payment_method: 'web'
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (data.payment_url) {
+          window.location.href = data.payment_url;
+        } else {
+          alert('Pago de estacionamiento registrado correctamente.');
+          handleCheck();
+        }
+      } else {
+        alert(data.error || 'Error al registrar el pago.');
+      }
+    } catch (err) {
+      alert('Error de conexión.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getMonthName = (monthNumber: number) => {
     const list = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     return list[monthNumber - 1];
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(amount);
   };
 
   return (
@@ -126,9 +168,33 @@ export default function MensualidadPage() {
               <div className="card" style={{ textAlign: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <span style={{ fontSize: '3rem', display: 'block', marginBottom: 16 }}>⚠️</span>
                 <h3 style={{ color: '#f5f5f5', fontSize: '1.2rem', marginBottom: 8 }}>Patente no encontrada</h3>
-                <p style={{ color: '#a0a0a0' }}>{result.message}</p>
-                <p style={{ marginTop: 16, color: '#666', fontSize: '0.85rem' }}>
-                  Si crees que esto es un error, por favor contactanos por WhatsApp o directo en el local.
+                <p style={{ color: '#a0a0a0' }}>La patente <span className="text-yellow-500 font-bold">{patent}</span> no está registrada como socio.</p>
+                
+                <div style={{ marginTop: 24, padding: '20px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '12px', border: '1px dashed rgba(212, 175, 55, 0.3)' }}>
+                  <p style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 600, marginBottom: 16 }}>¿Querés ser parte del Club Diamond?</p>
+                  <a 
+                    href={`https://wa.me/56940889752?text=${encodeURIComponent(`Hola, quiero contratar un plan mensual de estacionamiento para la patente ${patent}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary"
+                    style={{ 
+                      width: '100%', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: 10,
+                      background: '#25D366',
+                      borderColor: '#25D366',
+                      color: '#fff',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <span>💬</span> Contratar Plan por WhatsApp
+                  </a>
+                </div>
+
+                <p style={{ marginTop: 24, color: '#666', fontSize: '0.85rem' }}>
+                  Si crees que esto es un error, por favor contactanos directo en el local.
                 </p>
               </div>
             ) : (
@@ -175,43 +241,18 @@ export default function MensualidadPage() {
                 {!result.is_paid && (
                   <div>
                     <p style={{ color: '#a0a0a0', fontSize: '0.85rem', marginBottom: 16, textAlign: 'center' }}>
-                      Podes abonar tu mensualidad de forma rápida y segura a través de Mercado Pago.
+                      Podes abonar tu mensualidad de forma rápida y segura a través de TUU (Haulmer).
                     </p>
                     <button 
                       className="btn-primary" 
                       style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10 }}
                       disabled={loading}
-                      onClick={async () => {
-                        if (!result.membership) return;
-                        setLoading(true);
-                        try {
-                          const res = await fetch('/api/memberships/pay', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              membership_id: result.membership.id,
-                              month: result.current_month,
-                              year: result.current_year,
-                              amount: 50000
-                            })
-                          });
-                          if (res.ok) {
-                            alert('Pago de estacionamiento registrado correctamente.');
-                            handleCheck();
-                          } else {
-                            alert('Error al registrar el pago.');
-                          }
-                        } catch (err) {
-                          alert('Error de conexión.');
-                        } finally {
-                          setLoading(false);
-                        }
-                      }}
+                      onClick={handlePayMonthly}
                     >
-                      {loading ? 'Procesando...' : 'PAGAR MES AHORA'}
+                      {loading ? 'Procesando...' : `PAGAR ${formatCurrency(result.monthly_price || 0)} AHORA`}
                     </button>
                     <p style={{ color: '#666', fontSize: '0.75rem', marginTop: 12, textAlign: 'center' }}>
-                      El pago se registrará inmediatamente en el sistema local.
+                      El pago se registrará inmediatamente en el sistema local tras completar la transacción.
                     </p>
                   </div>
                 )}

@@ -56,8 +56,8 @@ export function PaymentSummary({ exit, onConfirm, onCancel }: PaymentSummaryProp
   const isSubscriber = exit.was_subscription;
 
   return (
-    <div className="fixed inset-0 modal-overlay flex items-center justify-center" style={{ zIndex: 9999 }}>
-      <div className="modal-content w-full max-w-md animate-fade-in" style={{ zIndex: 10000 }}>
+    <div className="fixed inset-0 modal-overlay flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+      <div className="modal-content w-full max-w-sm animate-fade-in max-h-[95vh] overflow-y-auto" style={{ zIndex: 10000 }}>
         {/* Header */}
         <div
           className={`py-8 px-6 text-center ${isExempt ? 'bg-gradient-to-b from-purple-900/50 to-transparent' : 'bg-gradient-to-b from-yellow-900/30 to-transparent'}`}

@@ -374,22 +374,19 @@ router.post('/', async (c) => {
 
     // ---- TUU Integration (skip for subscriptions) ----
     let initPoint = null;
-    if (!isSubBooking) {
-      // Reusing the MP token column temporarily until dashboard is updated to say "TUU API Key"
+    if (!isSubBooking && amountToCharge > 0) {
       const apiKey = (await db.get<{ value: string }>("SELECT value FROM settings WHERE key = 'tuu_api_key'"))?.value
         || (await db.get<{ value: string }>("SELECT value FROM settings WHERE key = 'mercado_pago_access_token'"))?.value;
       
-      if (apiKey && amountToCharge > 0) {
-        console.log('[POST /bookings] Generando checkout de TUU online...');
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001';
-        
+      if (apiKey) {
+        console.log('[POST /bookings] Generando checkout de TUU...');
         const tuuProvider = new TuuProvider(apiKey);
         const paymentRes = await tuuProvider.createPayment({
           id,
           amount: amountToCharge,
           title: `Checkout - ${serviceNames.join(', ')}`,
-          successUrl: `${siteUrl}?status=success&booking=${id}`,
-          failureUrl: `${siteUrl}?status=failure&booking=${id}`,
+          successUrl: `/lavado-de-autos-arauco?status=success&booking=${id}`,
+          failureUrl: `/lavado-de-autos-arauco?status=failure&booking=${id}`,
         });
 
         if (paymentRes.paymentUrl) {

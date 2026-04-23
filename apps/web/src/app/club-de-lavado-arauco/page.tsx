@@ -137,14 +137,19 @@ export default function ClubLavadoPage() {
           membership_id: result.membership.id,
           month: result.current_month,
           year: result.current_year,
-          amount: result.monthly_price
+          amount: result.monthly_price,
+          payment_method: 'web'
         })
       });
+      const data = await res.json();
       if (res.ok) {
-        alert('Pago registrado correctamente. ¡Tus créditos de lavado han sido renovados!');
-        handleCheck();
+        if (data.payment_url) {
+          window.location.href = data.payment_url;
+        } else {
+          alert('Pago registrado correctamente. ¡Tus créditos de lavado han sido renovados!');
+          handleCheck();
+        }
       } else {
-        const data = await res.json();
         alert(data.error || 'Error al procesar el pago');
       }
     } catch (_err) {
@@ -290,7 +295,67 @@ export default function ClubLavadoPage() {
               </div>
             </form>
 
-            {error && <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: 8, padding: 12, marginBottom: 20, color: '#fca5a5' }}>{error}</div>}
+            {error && (
+              <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: 8, padding: 12, marginBottom: 20, color: '#fca5a5' }}>
+                {error}
+                {error.includes('no está registrada') && (
+                  <div style={{ marginTop: 16, padding: '16px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '12px', border: '1px dashed rgba(212, 175, 55, 0.3)', textAlign: 'center' }}>
+                    <p style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, marginBottom: 12 }}>¿Querés unirte al Club de Lavado?</p>
+                    <a 
+                      href={`https://wa.me/56940889752?text=${encodeURIComponent(`Hola, quiero contratar un plan mensual de lavado para la patente ${patent}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-primary"
+                      style={{ 
+                        width: '100%', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        gap: 10,
+                        background: '#25D366',
+                        borderColor: '#25D366',
+                        color: '#fff',
+                        textDecoration: 'none',
+                        fontSize: '0.8rem'
+                      }}
+                    >
+                      <span>💬</span> Contratar Plan por WhatsApp
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {result?.exists === false && (
+              <div className="card animate-fade-in" style={{ textAlign: 'center', marginBottom: 24 }}>
+                <span style={{ fontSize: '3rem', display: 'block', marginBottom: 16 }}>⚠️</span>
+                <h3 style={{ color: '#f5f5f5', fontSize: '1.2rem', marginBottom: 8 }}>Patente no encontrada</h3>
+                <p style={{ color: '#a0a0a0', marginBottom: 20 }}>La patente <span className="text-yellow-500 font-bold">{patent}</span> no está registrada como socio del Club.</p>
+                
+                <div style={{ padding: '20px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '12px', border: '1px dashed rgba(212, 175, 55, 0.3)' }}>
+                  <p style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 600, marginBottom: 16 }}>¿Querés unirte al Club de Lavado?</p>
+                  <a 
+                    href={`https://wa.me/56940889752?text=${encodeURIComponent(`Hola, quiero contratar un plan mensual de lavado para la patente ${patent}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary"
+                    style={{ 
+                      width: '100%', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: 10,
+                      background: '#25D366',
+                      borderColor: '#25D366',
+                      color: '#fff',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <span>💬</span> Contratar Plan por WhatsApp
+                  </a>
+                </div>
+              </div>
+            )}
 
             {result?.exists && result.membership && (
               <div className="card animate-fade-in" style={{ border: result.is_paid ? '1px solid #1e3a8a' : '1px solid #7f1d1d' }}>

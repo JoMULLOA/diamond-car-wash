@@ -200,9 +200,12 @@ export function MemberManagement() {
     }
   };
 
-  const handlePayMonth = async (membership: MonthlyMembership) => {
+  const [payingMembership, setPayingMembership] = useState<MonthlyMembership | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  const handlePayMonth = async (membership: MonthlyMembership, method: 'cash' | 'pos' | 'web') => {
     const amount = membership.monthly_price;
-    if (!window.confirm(`¿Confirmar pago de ${formatCurrency(amount)} para ${membership.patent}?`)) return;
+    setIsProcessingPayment(true);
     
     const d = new Date();
     try {
@@ -213,18 +216,25 @@ export function MemberManagement() {
           membership_id: membership.id,
           month: d.getMonth() + 1,
           year: d.getFullYear(),
-          amount
+          amount,
+          payment_method: method
         })
       });
       
+      const data = await res.json();
       if (res.ok) {
+        if (method === 'web' && data.payment_url) {
+          window.open(data.payment_url, '_blank');
+        }
+        setPayingMembership(null);
         fetchMemberships();
       } else {
-        const data = await res.json();
         alert(data.error);
       }
     } catch (err) {
       alert('Error procesando pago.');
+    } finally {
+      setIsProcessingPayment(false);
     }
   };
 
@@ -553,7 +563,7 @@ export function MemberManagement() {
                 <div>
                   {!m.is_current_month_paid ? (
                     <button
-                      onClick={() => handlePayMonth(m)}
+                      onClick={() => setPayingMembership(m)}
                       className="text-yellow-500 hover:text-yellow-400 text-xs sm:text-sm font-bold transition-all border border-yellow-500/50 hover:border-yellow-400 px-4 py-2 rounded bg-yellow-500/10 hover:bg-yellow-500/20 shadow-[0_0_15px_rgba(212,175,55,0.15)] whitespace-nowrap flex items-center gap-2"
                     >
                       <CreditCard size={14} />
@@ -589,6 +599,62 @@ export function MemberManagement() {
           ))
         )}
       </div>
+
+      {/* Payment Method Modal */}
+      {payingMembership && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#141414] border border-[#d4af37]/30 rounded-xl w-full max-w-sm overflow-hidden shadow-2xl">
+            <div className="p-6 text-center border-b border-gray-800">
+              <h3 className="text-xl font-bold text-white mb-1">Registrar Pago</h3>
+              <p className="text-gray-400 text-sm">
+                Socio: <span className="text-yellow-500">{payingMembership.owner_name}</span> ({payingMembership.patent})
+              </p>
+              <div className="mt-4 text-2xl font-bold text-yellow-500">
+                {formatCurrency(payingMembership.monthly_price)}
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-3">
+              <p className="text-gray-500 text-[10px] uppercase tracking-widest text-center mb-2">Seleccione método</p>
+              
+              <button 
+                onClick={() => handlePayMonth(payingMembership, 'cash')}
+                disabled={isProcessingPayment}
+                className="w-full flex items-center justify-between p-4 rounded-lg bg-gray-900 border border-gray-800 hover:border-green-500/50 hover:bg-green-500/5 transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded bg-green-500/10 text-green-500">
+                    <Check size={20} />
+                  </div>
+                  <span className="font-medium text-gray-200">Efectivo</span>
+                </div>
+                <span className="text-xs text-gray-500 group-hover:text-green-500">Presencial</span>
+              </button>
+
+              <button 
+                onClick={() => handlePayMonth(payingMembership, 'pos')}
+                disabled={isProcessingPayment}
+                className="w-full flex items-center justify-between p-4 rounded-lg bg-gray-900 border border-gray-800 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded bg-blue-500/10 text-blue-500">
+                    <CreditCard size={20} />
+                  </div>
+                  <span className="font-medium text-gray-200">POS / Tarjeta</span>
+                </div>
+                <span className="text-xs text-gray-500 group-hover:text-blue-500">Terminal Haulmer</span>
+              </button>
+
+              <button 
+                onClick={() => setPayingMembership(null)}
+                className="w-full py-3 text-gray-500 hover:text-gray-300 text-sm transition-colors mt-2"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
