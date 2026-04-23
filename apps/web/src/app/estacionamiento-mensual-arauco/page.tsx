@@ -5,11 +5,12 @@ import Link from 'next/link';
 
 interface CheckResponse {
   exists: boolean;
-  membership?: { id?: string; owner_name: string; patent: string };
+  membership?: { id?: string; owner_name: string; patent: string; type: string };
   is_paid?: boolean;
   message?: string;
   current_month?: number;
   current_year?: number;
+  monthly_price?: number;
 }
 
 export default function MensualidadPage() {
