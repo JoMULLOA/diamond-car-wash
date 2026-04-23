@@ -300,17 +300,17 @@ export default function ClubLavadoPage() {
                 {error}
                 {error.includes('no está registrada') && (
                   <div style={{ marginTop: 16, padding: '16px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '12px', border: '1px dashed rgba(212, 175, 55, 0.3)', textAlign: 'center' }}>
-                    <p style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, marginBottom: 12 }}>¿Querés unirte al Club de Lavado?</p>
-                    <a 
+                    <p style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, marginBottom: 12 }}>¿Quieres unirte al Club de Lavado?</p>
+                    <a
                       href={`https://wa.me/56940889752?text=${encodeURIComponent(`Hola, quiero contratar un plan mensual de lavado para la patente ${patent}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn-primary"
-                      style={{ 
-                        width: '100%', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         gap: 10,
                         background: '#25D366',
                         borderColor: '#25D366',
@@ -331,19 +331,19 @@ export default function ClubLavadoPage() {
                 <span style={{ fontSize: '3rem', display: 'block', marginBottom: 16 }}>⚠️</span>
                 <h3 style={{ color: '#f5f5f5', fontSize: '1.2rem', marginBottom: 8 }}>Patente no encontrada</h3>
                 <p style={{ color: '#a0a0a0', marginBottom: 20 }}>La patente <span className="text-yellow-500 font-bold">{patent}</span> no está registrada como socio del Club.</p>
-                
+
                 <div style={{ padding: '20px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '12px', border: '1px dashed rgba(212, 175, 55, 0.3)' }}>
-                  <p style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 600, marginBottom: 16 }}>¿Querés unirte al Club de Lavado?</p>
-                  <a 
+                  <p style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 600, marginBottom: 16 }}>¿Quieres unirte al Club de Lavado?</p>
+                  <a
                     href={`https://wa.me/56940889752?text=${encodeURIComponent(`Hola, quiero contratar un plan mensual de lavado para la patente ${patent}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn-primary"
-                    style={{ 
-                      width: '100%', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       gap: 10,
                       background: '#25D366',
                       borderColor: '#25D366',
@@ -358,35 +358,57 @@ export default function ClubLavadoPage() {
             )}
 
             {result?.exists && result.membership && (
-              <div className="card animate-fade-in" style={{ border: result.is_paid ? '1px solid #1e3a8a' : '1px solid #7f1d1d' }}>
-                <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                  <h3 style={{ fontSize: '1.5rem', color: '#f5f5f5' }}>Hola, {result.membership.owner_name}</h3>
-                  <p style={{ color: '#d4af37', fontWeight: 600 }}>{result.membership.patent}</p>
+              <div className="card animate-fade-in" style={{
+                border: result.is_paid ? '1px solid rgba(34, 197, 94, 0.5)' : '1px solid rgba(212, 175, 55, 0.5)',
+                background: result.is_paid ? 'linear-gradient(145deg, #1a1a1a 0%, #0a1f0f 100%)' : 'linear-gradient(145deg, #1a1a1a 0%, #1a140a 100%)'
+              }}>
+                <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                  <span style={{ fontSize: '3rem', display: 'block', marginBottom: 16 }}>
+                    {result.is_paid ? '✅' : '💳'}
+                  </span>
+                  <h3 style={{ fontSize: '1.5rem', color: '#f5f5f5', marginBottom: 4 }}>Hola, {result.membership.owner_name}</h3>
+                  <p style={{ color: '#a0a0a0', fontSize: '0.9rem', letterSpacing: '0.1em' }}>{result.membership.patent}</p>
                 </div>
 
                 {!result.is_paid ? (
-                  <div style={{ background: '#450a0a', border: '1px solid #991b1b', padding: 20, borderRadius: 8, marginBottom: 20 }}>
-                    <p style={{ color: '#fecaca', fontSize: '0.9rem', textAlign: 'center', marginBottom: 12 }}>Mensualidad pendiente de {getMonthName(result.current_month || 1)}</p>
-                    <button onClick={handlePayMonthly} disabled={paying} className="btn-primary" style={{ width: '100%', background: '#b91c1c' }}>
+                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: 20, borderRadius: 12, marginBottom: 24, textAlign: 'center' }}>
+                    <p style={{ color: '#666', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>
+                      Mensualidad pendiente de {getMonthName(result.current_month || 1)}
+                    </p>
+                    <button onClick={handlePayMonthly} disabled={paying} className="btn-primary" style={{ width: '100%' }}>
                       {paying ? 'Procesando...' : `PAGAR ${formatCurrency(result.monthly_price || 0)} AHORA`}
                     </button>
+                    <p style={{ color: '#666', fontSize: '0.75rem', marginTop: 12 }}>
+                      El pago se registrará inmediatamente tras completar la transacción.
+                    </p>
                   </div>
                 ) : (
-                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: 20, borderRadius: 8, marginBottom: 20, textAlign: 'center' }}>
-                    <p style={{ color: '#4d7c0f', fontWeight: 700, marginBottom: 12 }}>✅ SUSCRIPCIÓN AL DÍA</p>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
+                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: 20, borderRadius: 12, marginBottom: 24, textAlign: 'center' }}>
+                    <p style={{ color: '#4d7c0f', fontWeight: 700, marginBottom: 16, fontSize: '0.9rem', letterSpacing: '0.1em' }}>✅ SUSCRIPCIÓN AL DÍA</p>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 16 }}>
                       {[1, 2, 3, 4].map(i => (
-                        <div key={i} style={{ width: 40, height: 40, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: i <= (result.membership?.washes_remaining || 0) ? '#1d4ed8' : '#1a1a1a', color: i <= (result.membership?.washes_remaining || 0) ? 'white' : '#333' }}>
+                        <div key={i} style={{ 
+                          width: 42, 
+                          height: 42, 
+                          borderRadius: 10, 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          background: i <= (result.membership?.washes_remaining || 0) ? 'linear-gradient(135deg, #1d4ed8, #3b82f6)' : '#1a1a1a', 
+                          color: i <= (result.membership?.washes_remaining || 0) ? 'white' : '#333',
+                          border: '1px solid rgba(255,255,255,0.05)',
+                          boxShadow: i <= (result.membership?.washes_remaining || 0) ? '0 4px 12px rgba(59, 130, 246, 0.3)' : 'none'
+                        }}>
                           {i <= (result.membership?.washes_remaining || 0) ? '🧼' : '·'}
                         </div>
                       ))}
                     </div>
-                    <p style={{ color: '#f5f5f5' }}>{result.membership?.washes_remaining || 0} lavados disponibles</p>
+                    <p style={{ color: '#f5f5f5', fontSize: '0.95rem' }}>{result.membership?.washes_remaining || 0} lavados disponibles</p>
                   </div>
                 )}
 
                 {result.is_paid && (result.membership?.washes_remaining || 0) > 0 && (
-                  <button className="btn-primary" style={{ width: '100%' }} onClick={() => setStep('schedule')}>🗓️ Agendar Turno</button>
+                  <button className="btn-primary" style={{ width: '100%', padding: '16px' }} onClick={() => setStep('schedule')}>🗓️ Agendar Turno</button>
                 )}
               </div>
             )}

@@ -170,19 +170,19 @@ export default function MensualidadPage() {
                 <span style={{ fontSize: '3rem', display: 'block', marginBottom: 16 }}>⚠️</span>
                 <h3 style={{ color: '#f5f5f5', fontSize: '1.2rem', marginBottom: 8 }}>Patente no encontrada</h3>
                 <p style={{ color: '#a0a0a0' }}>La patente <span className="text-yellow-500 font-bold">{patent}</span> no está registrada como socio.</p>
-                
+
                 <div style={{ marginTop: 24, padding: '20px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '12px', border: '1px dashed rgba(212, 175, 55, 0.3)' }}>
-                  <p style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 600, marginBottom: 16 }}>¿Querés ser parte del Club Diamond?</p>
-                  <a 
+                  <p style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 600, marginBottom: 16 }}>¿Quieres ser parte del Club Diamond?</p>
+                  <a
                     href={`https://wa.me/56940889752?text=${encodeURIComponent(`Hola, quiero contratar un plan mensual de estacionamiento para la patente ${patent}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn-primary"
-                    style={{ 
-                      width: '100%', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       gap: 10,
                       background: '#25D366',
                       borderColor: '#25D366',
@@ -244,8 +244,8 @@ export default function MensualidadPage() {
                     <p style={{ color: '#a0a0a0', fontSize: '0.85rem', marginBottom: 16, textAlign: 'center' }}>
                       Podes abonar tu mensualidad de forma rápida y segura a través de TUU (Haulmer).
                     </p>
-                    <button 
-                      className="btn-primary" 
+                    <button
+                      className="btn-primary"
                       style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10 }}
                       disabled={loading}
                       onClick={handlePayMonthly}

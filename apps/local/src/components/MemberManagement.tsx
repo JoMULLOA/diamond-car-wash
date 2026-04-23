@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../api';
 import { useSettingsStore } from '../store';
-import { 
-  Gem, 
-  Plus, 
-  X, 
-  Search, 
-  List, 
-  SquareParking, 
-  Waves, 
-  Pencil, 
-  Trash2, 
+import {
+  Gem,
+  Plus,
+  X,
+  Search,
+  List,
+  SquareParking,
+  Waves,
+  Pencil,
+  Trash2,
   Check,
   CreditCard
 } from 'lucide-react';
@@ -54,7 +54,7 @@ export function MemberManagement() {
   const [error, setError] = useState<string | null>(null);
   const [tabFilter, setTabFilter] = useState<TabFilter>('all');
   const [patentFilter, setPatentFilter] = useState('');
-  
+
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newPatent, setNewPatent] = useState('');
@@ -107,7 +107,7 @@ export function MemberManagement() {
   }, []);
 
   const toggleService = (serviceId: string) => {
-    setSelectedServiceIds(prev => 
+    setSelectedServiceIds(prev =>
       prev.includes(serviceId)
         ? prev.filter(id => id !== serviceId)
         : [...prev, serviceId]
@@ -134,7 +134,7 @@ export function MemberManagement() {
       alert('Seleccioná al menos un servicio para el socio de lavado');
       return;
     }
-    
+
     try {
       const payload = {
         id: editingId,
@@ -145,9 +145,9 @@ export function MemberManagement() {
         service_ids: newType === 'wash' ? selectedServiceIds : [],
         monthly_price: newType === 'wash' ? monthlyPrice : parseInt(manualPrice) || 0
       };
-      
+
       console.log('[MemberManagement] Sending:', JSON.stringify(payload));
-      
+
       const res = await apiFetch('/api/memberships', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -185,8 +185,8 @@ export function MemberManagement() {
   };
 
   const handleDelete = async (m: MonthlyMembership) => {
-    if (!window.confirm(`¿Estás seguro de que querés eliminar al socio ${m.owner_name} (${m.patent})? Esto borrará también el historial de pagos.`)) return;
-    
+    if (!window.confirm(`¿Estás seguro de que quieres eliminar al socio ${m.owner_name} (${m.patent})? Esto borrará también el historial de pagos.`)) return;
+
     try {
       const res = await apiFetch(`/api/memberships/${m.id}`, { method: 'DELETE' });
       if (res.ok) {
@@ -206,7 +206,7 @@ export function MemberManagement() {
   const handlePayMonth = async (membership: MonthlyMembership, method: 'cash' | 'pos' | 'web') => {
     const amount = membership.monthly_price;
     setIsProcessingPayment(true);
-    
+
     const d = new Date();
     try {
       const res = await apiFetch('/api/memberships/pay', {
@@ -220,7 +220,7 @@ export function MemberManagement() {
           payment_method: method
         })
       });
-      
+
       const data = await res.json();
       if (res.ok) {
         if (method === 'web' && data.payment_url) {
@@ -292,17 +292,16 @@ export function MemberManagement() {
             <button
               key={tab.key}
               onClick={() => setTabFilter(tab.key)}
-              className={`px-4 py-2 text-sm rounded transition-colors whitespace-nowrap flex items-center gap-2 ${
-                tabFilter === tab.key
+              className={`px-4 py-2 text-sm rounded transition-colors whitespace-nowrap flex items-center gap-2 ${tabFilter === tab.key
                   ? 'bg-yellow-500/10 text-yellow-500'
                   : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
-              }`}
+                }`}
             >
               {tab.icon} {tab.label}
             </button>
           ))}
         </div>
-        
+
         <div className="relative flex-1">
           <input
             type="text"
@@ -315,7 +314,7 @@ export function MemberManagement() {
             <Search size={18} />
           </span>
           {patentFilter && (
-            <button 
+            <button
               onClick={() => setPatentFilter('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-yellow-500"
             >
@@ -328,17 +327,16 @@ export function MemberManagement() {
       {isAdding && (
         <form onSubmit={handleAddSubmit} className="bg-[#141414] p-6 rounded-lg border border-[#d4af37]/20">
           <h3 className="text-lg font-medium text-gray-200 mb-4">{editingId ? 'Editar Socio' : 'Agregar Nuevo Socio'}</h3>
-          
+
           {/* Membership Type Selection */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             <button
               type="button"
               onClick={() => { setNewType('parking'); setSelectedServiceIds([]); }}
-              className={`p-4 rounded-lg border text-left transition-all ${
-                newType === 'parking'
+              className={`p-4 rounded-lg border text-left transition-all ${newType === 'parking'
                   ? 'border-yellow-500 bg-yellow-500/10'
                   : 'border-gray-700 hover:border-gray-500'
-              }`}
+                }`}
             >
               <div className="mb-2">
                 <SquareParking size={28} className={newType === 'parking' ? 'text-yellow-500' : 'text-gray-500'} />
@@ -351,11 +349,10 @@ export function MemberManagement() {
             <button
               type="button"
               onClick={() => setNewType('wash')}
-              className={`p-4 rounded-lg border text-left transition-all ${
-                newType === 'wash'
+              className={`p-4 rounded-lg border text-left transition-all ${newType === 'wash'
                   ? 'border-yellow-500 bg-yellow-500/10'
                   : 'border-gray-700 hover:border-gray-500'
-              }`}
+                }`}
             >
               <div className="mb-2">
                 <Waves size={28} className={newType === 'wash' ? 'text-yellow-500' : 'text-gray-500'} />
@@ -433,11 +430,10 @@ export function MemberManagement() {
                       key={s.id}
                       type="button"
                       onClick={() => toggleService(s.id)}
-                      className={`p-3 rounded-lg border text-left transition-all flex items-center justify-between ${
-                        isSelected
+                      className={`p-3 rounded-lg border text-left transition-all flex items-center justify-between ${isSelected
                           ? 'border-blue-500 bg-blue-500/10'
                           : 'border-gray-700 hover:border-gray-500'
-                      }`}
+                        }`}
                     >
                       <div>
                         <div className={`text-sm font-medium ${isSelected ? 'text-blue-400' : 'text-gray-300'}`}>
@@ -447,11 +443,10 @@ export function MemberManagement() {
                           {s.duration_minutes} min · {formatCurrency(s.price)}
                         </div>
                       </div>
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                        isSelected 
-                          ? 'border-blue-500 bg-blue-500 text-white' 
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isSelected
+                          ? 'border-blue-500 bg-blue-500 text-white'
                           : 'border-gray-600'
-                      }`}>
+                        }`}>
                         {isSelected && <Check size={12} />}
                       </div>
                     </button>
@@ -503,7 +498,7 @@ export function MemberManagement() {
         ) : (
           filtered.map((m) => (
             <div key={m.id} className="bg-[#0a0a0a] rounded-lg border border-[#d4af37]/20 overflow-hidden shadow-lg hover:border-[#d4af37]/40 transition-all p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:items-center justify-between group">
-              
+
               {/* Left: Patent and Basic Info */}
               <div className="flex flex-col gap-3 sm:w-1/3">
                 <div className="flex items-center gap-3 flex-wrap">
@@ -613,11 +608,11 @@ export function MemberManagement() {
                 {formatCurrency(payingMembership.monthly_price)}
               </div>
             </div>
-            
+
             <div className="p-6 space-y-3">
               <p className="text-gray-500 text-[10px] uppercase tracking-widest text-center mb-2">Seleccione método</p>
-              
-              <button 
+
+              <button
                 onClick={() => handlePayMonth(payingMembership, 'cash')}
                 disabled={isProcessingPayment}
                 className="w-full flex items-center justify-between p-4 rounded-lg bg-gray-900 border border-gray-800 hover:border-green-500/50 hover:bg-green-500/5 transition-all group"
@@ -631,7 +626,7 @@ export function MemberManagement() {
                 <span className="text-xs text-gray-500 group-hover:text-green-500">Presencial</span>
               </button>
 
-              <button 
+              <button
                 onClick={() => handlePayMonth(payingMembership, 'pos')}
                 disabled={isProcessingPayment}
                 className="w-full flex items-center justify-between p-4 rounded-lg bg-gray-900 border border-gray-800 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all group"
@@ -645,7 +640,7 @@ export function MemberManagement() {
                 <span className="text-xs text-gray-500 group-hover:text-blue-500">Terminal Haulmer</span>
               </button>
 
-              <button 
+              <button
                 onClick={() => setPayingMembership(null)}
                 className="w-full py-3 text-gray-500 hover:text-gray-300 text-sm transition-colors mt-2"
               >
