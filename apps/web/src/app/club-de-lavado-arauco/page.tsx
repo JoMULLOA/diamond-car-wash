@@ -283,82 +283,73 @@ export default function ClubLavadoPage() {
             </span>
           </div>
           <h2 style={{ fontSize: '1.8rem', color: '#f5f5f5', marginBottom: 12 }}>Portal del Socio</h2>
-        </section>
-
-        {step === 'check' && (
-          <div className="animate-fade-in">
-            <form onSubmit={handleCheck} style={{ marginBottom: 24 }}>
-              <label style={{ color: '#666', fontSize: '0.75rem', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Patente</label>
-              <div style={{ display: 'flex', gap: 12 }}>
-                <input className="input" type="text" placeholder="Ej: BBCC12" value={patent} onChange={(e) => setPatent(e.target.value.toUpperCase())} required />
-                <button type="submit" className="btn-primary" disabled={loading}>{loading ? '...' : 'Consultar'}</button>
+          <div className="card" style={{ padding: '30px' }}>
+            <form onSubmit={handleCheck} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', color: '#d4af37', marginBottom: '8px', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+                  Patente del Vehículo
+                </label>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="Ej: ABCD12"
+                  value={patent}
+                  onChange={e => setPatent(e.target.value.toUpperCase())}
+                  style={{ textAlign: 'center', fontSize: '1.4rem', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', background: '#000' }}
+                  required
+                />
               </div>
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={loading}
+                style={{ padding: '18px', fontSize: '0.9rem', fontWeight: 700, letterSpacing: '0.1em' }}
+              >
+                {loading ? 'CONSULTANDO...' : 'CONSULTAR ESTADO'}
+              </button>
             </form>
+          </div>
 
-            {error && (
-              <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: 8, padding: 12, marginBottom: 20, color: '#fca5a5' }}>
-                {error}
-                {error.includes('no está registrada') && (
-                  <div style={{ marginTop: 16, padding: '16px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '12px', border: '1px dashed rgba(212, 175, 55, 0.3)', textAlign: 'center' }}>
-                    <p style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, marginBottom: 12 }}>¿Quieres unirte al Club de Lavado?</p>
-                    <a
-                      href={`https://wa.me/56940889752?text=${encodeURIComponent(`Hola, quiero contratar un plan mensual de lavado para la patente ${patent}`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-primary"
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 10,
-                        background: '#25D366',
-                        borderColor: '#25D366',
-                        color: '#fff',
-                        textDecoration: 'none',
-                        fontSize: '0.8rem'
-                      }}
-                    >
-                      <span>💬</span> Contratar Plan por WhatsApp
-                    </a>
-                  </div>
-                )}
+          {error && (
+            <div style={{ marginTop: 24, padding: 16, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: 8, color: '#fca5a5', textAlign: 'center' }}>
+              {error}
+            </div>
+          )}
+
+          {result?.exists === false && (
+            <div className="card animate-fade-in" style={{ textAlign: 'center', marginTop: 24, border: '1px solid rgba(255,255,255,0.1)' }}>
+              <span style={{ fontSize: '3rem', display: 'block', marginBottom: 16 }}>⚠️</span>
+              <h3 style={{ color: '#f5f5f5', fontSize: '1.2rem', marginBottom: 8 }}>Patente no encontrada</h3>
+              <p style={{ color: '#a0a0a0', marginBottom: 20 }}>La patente <span className="text-yellow-500 font-bold">{patent}</span> no está registrada como socio del Club.</p>
+              
+              <div style={{ padding: '20px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '12px', border: '1px dashed rgba(212, 175, 55, 0.3)' }}>
+                <p style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 600, marginBottom: 16 }}>¿Quieres unirte al Club de Lavado?</p>
+                <a 
+                  href={`https://wa.me/56940889752?text=${encodeURIComponent(`Hola, quiero contratar un plan mensual de lavado para la patente ${patent}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary"
+                  style={{ 
+                    width: '100%', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: 10,
+                    background: '#25D366',
+                    borderColor: '#25D366',
+                    color: '#fff',
+                    textDecoration: 'none'
+                  }}
+                >
+                  <span>💬</span> Contratar Plan por WhatsApp
+                </a>
               </div>
-            )}
+            </div>
+          )}
 
-            {result?.exists === false && (
-              <div className="card animate-fade-in" style={{ textAlign: 'center', marginBottom: 24 }}>
-                <span style={{ fontSize: '3rem', display: 'block', marginBottom: 16 }}>⚠️</span>
-                <h3 style={{ color: '#f5f5f5', fontSize: '1.2rem', marginBottom: 8 }}>Patente no encontrada</h3>
-                <p style={{ color: '#a0a0a0', marginBottom: 20 }}>La patente <span className="text-yellow-500 font-bold">{patent}</span> no está registrada como socio del Club.</p>
-
-                <div style={{ padding: '20px', background: 'rgba(212, 175, 55, 0.05)', borderRadius: '12px', border: '1px dashed rgba(212, 175, 55, 0.3)' }}>
-                  <p style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 600, marginBottom: 16 }}>¿Quieres unirte al Club de Lavado?</p>
-                  <a
-                    href={`https://wa.me/56940889752?text=${encodeURIComponent(`Hola, quiero contratar un plan mensual de lavado para la patente ${patent}`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-primary"
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 10,
-                      background: '#25D366',
-                      borderColor: '#25D366',
-                      color: '#fff',
-                      textDecoration: 'none'
-                    }}
-                  >
-                    <span>💬</span> Contratar Plan por WhatsApp
-                  </a>
-                </div>
-              </div>
-            )}
-
-            {result?.exists && result.membership && (
-              <div className="card animate-fade-in" style={{
+          {result?.exists && result.membership && (
+            <div className="animate-fade-in" style={{ marginTop: 24 }}>
+              <div className="card" style={{
                 border: result.is_paid ? '1px solid rgba(34, 197, 94, 0.5)' : '1px solid rgba(212, 175, 55, 0.5)',
                 background: result.is_paid ? 'linear-gradient(145deg, #1a1a1a 0%, #0a1f0f 100%)' : 'linear-gradient(145deg, #1a1a1a 0%, #1a140a 100%)'
               }}>
@@ -367,19 +358,44 @@ export default function ClubLavadoPage() {
                     {result.is_paid ? '✅' : '💳'}
                   </span>
                   <h3 style={{ fontSize: '1.5rem', color: '#f5f5f5', marginBottom: 4 }}>Hola, {result.membership.owner_name}</h3>
-                  <p style={{ color: '#a0a0a0', fontSize: '0.9rem', letterSpacing: '0.1em' }}>{result.membership.patent}</p>
+                  <p style={{ color: '#a0a0a0', fontSize: '0.9rem', letterSpacing: '0.1em' }}>Patente: {result.membership.patent}</p>
+                </div>
+
+                <div style={{
+                  background: 'rgba(0,0,0,0.4)',
+                  padding: '24px 20px',
+                  borderRadius: 12,
+                  marginBottom: 24,
+                  textAlign: 'center',
+                  border: '1px solid rgba(255,255,255,0.03)'
+                }}>
+                  <p style={{ color: '#666', fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.15em', marginBottom: 12 }}>
+                    ESTADO DEL MES: {getMonthName(result.current_month || 1).toUpperCase()} {result.current_year}
+                  </p>
+
+                  {result.is_paid ? (
+                    <div style={{ color: '#f5f5f5', fontWeight: 600, fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                      <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 15px rgba(34, 197, 94, 0.6)' }}></span>
+                      Membresía Al Día
+                    </div>
+                  ) : (
+                    <div style={{ color: '#f5f5f5', fontWeight: 600, fontSize: '1.4rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                      <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 15px rgba(239, 68, 68, 0.6)', animation: 'pulse 2s infinite' }}></span>
+                      Pago Pendiente
+                    </div>
+                  )}
                 </div>
 
                 {!result.is_paid ? (
-                  <div style={{ background: 'rgba(0,0,0,0.3)', padding: 20, borderRadius: 12, marginBottom: 24, textAlign: 'center' }}>
-                    <p style={{ color: '#666', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>
-                      Mensualidad pendiente de {getMonthName(result.current_month || 1)}
+                  <div>
+                    <p style={{ color: '#a0a0a0', fontSize: '0.85rem', marginBottom: 16, textAlign: 'center' }}>
+                      Podes abonar tu mensualidad de forma rápida y segura a través de TUU (Haulmer).
                     </p>
-                    <button onClick={handlePayMonthly} disabled={paying} className="btn-primary" style={{ width: '100%' }}>
+                    <button onClick={handlePayMonthly} disabled={paying} className="btn-primary" style={{ width: '100%', padding: '16px' }}>
                       {paying ? 'Procesando...' : `PAGAR ${formatCurrency(result.monthly_price || 0)} AHORA`}
                     </button>
-                    <p style={{ color: '#666', fontSize: '0.75rem', marginTop: 12 }}>
-                      El pago se registrará inmediatamente tras completar la transacción.
+                    <p style={{ color: '#666', fontSize: '0.75rem', marginTop: 12, textAlign: 'center' }}>
+                      El pago se registrará inmediatamente en el sistema local tras completar la transacción.
                     </p>
                   </div>
                 ) : (
@@ -411,9 +427,9 @@ export default function ClubLavadoPage() {
                   <button className="btn-primary" style={{ width: '100%', padding: '16px' }} onClick={() => setStep('schedule')}>🗓️ Agendar Turno</button>
                 )}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </section>
 
         {step === 'schedule' && result && (
           <div className="animate-fade-in">
