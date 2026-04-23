@@ -22,12 +22,12 @@ interface MembershipCheck {
     type: string;
     washes_remaining: number;
   };
-  services: MemberService[];
-  total_duration: number;
-  is_paid: boolean;
-  current_month: number;
-  current_year: number;
-  monthly_price: number;
+  services?: MemberService[];
+  total_duration?: number;
+  is_paid?: boolean;
+  current_month?: number;
+  current_year?: number;
+  monthly_price?: number;
 }
 
 interface Slot {
@@ -137,7 +137,7 @@ export default function ClubLavadoPage() {
           membership_id: result.membership.id,
           month: result.current_month,
           year: result.current_year,
-          amount: result.monthly_price,
+          amount: result.monthly_price || 0,
           payment_method: 'web'
         })
       });
@@ -228,7 +228,7 @@ export default function ClubLavadoPage() {
     setWashesAfterBooking(null);
   };
 
-  const selectedServices = result?.services.filter(s => selectedServiceIds.includes(s.id)) || [];
+  const selectedServices = result?.services?.filter(s => selectedServiceIds.includes(s.id)) || [];
   const totalDuration = selectedServices.reduce((acc, s) => acc + s.duration_minutes, 0);
   const servicesSummary = selectedServices.map(s => s.name).join(' + ');
 
@@ -366,9 +366,9 @@ export default function ClubLavadoPage() {
 
                 {!result.is_paid ? (
                   <div style={{ background: '#450a0a', border: '1px solid #991b1b', padding: 20, borderRadius: 8, marginBottom: 20 }}>
-                    <p style={{ color: '#fecaca', fontSize: '0.9rem', textAlign: 'center', marginBottom: 12 }}>Mensualidad pendiente de {getMonthName(result.current_month)}</p>
+                    <p style={{ color: '#fecaca', fontSize: '0.9rem', textAlign: 'center', marginBottom: 12 }}>Mensualidad pendiente de {getMonthName(result.current_month || 1)}</p>
                     <button onClick={handlePayMonthly} disabled={paying} className="btn-primary" style={{ width: '100%', background: '#b91c1c' }}>
-                      {paying ? 'Procesando...' : `PAGAR ${formatCurrency(result.monthly_price)} AHORA`}
+                      {paying ? 'Procesando...' : `PAGAR ${formatCurrency(result.monthly_price || 0)} AHORA`}
                     </button>
                   </div>
                 ) : (
@@ -376,16 +376,16 @@ export default function ClubLavadoPage() {
                     <p style={{ color: '#4d7c0f', fontWeight: 700, marginBottom: 12 }}>✅ SUSCRIPCIÓN AL DÍA</p>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
                       {[1, 2, 3, 4].map(i => (
-                        <div key={i} style={{ width: 40, height: 40, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: i <= result.membership!.washes_remaining ? '#1d4ed8' : '#1a1a1a', color: i <= result.membership!.washes_remaining ? 'white' : '#333' }}>
-                          {i <= result.membership!.washes_remaining ? '🧼' : '·'}
+                        <div key={i} style={{ width: 40, height: 40, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: i <= (result.membership?.washes_remaining || 0) ? '#1d4ed8' : '#1a1a1a', color: i <= (result.membership?.washes_remaining || 0) ? 'white' : '#333' }}>
+                          {i <= (result.membership?.washes_remaining || 0) ? '🧼' : '·'}
                         </div>
                       ))}
                     </div>
-                    <p style={{ color: '#f5f5f5' }}>{result.membership.washes_remaining} lavados disponibles</p>
+                    <p style={{ color: '#f5f5f5' }}>{result.membership?.washes_remaining || 0} lavados disponibles</p>
                   </div>
                 )}
 
-                {result.is_paid && result.membership.washes_remaining > 0 && (
+                {result.is_paid && (result.membership?.washes_remaining || 0) > 0 && (
                   <button className="btn-primary" style={{ width: '100%' }} onClick={() => setStep('schedule')}>🗓️ Agendar Turno</button>
                 )}
               </div>
@@ -403,7 +403,7 @@ export default function ClubLavadoPage() {
             <div style={{ background: 'rgba(0,0,0,0.2)', padding: 16, borderRadius: 8, marginBottom: 20 }}>
               <p style={{ color: '#666', fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: 10 }}>¿Qué lavamos hoy?</p>
               <div style={{ display: 'grid', gap: 10 }}>
-                {result.services.map(s => (
+                {result?.services?.map(s => (
                   <button key={s.id} onClick={() => toggleService(s.id)} style={{ display: 'flex', justifyContent: 'space-between', padding: 12, borderRadius: 8, border: selectedServiceIds.includes(s.id) ? '1px solid #3b82f6' : '1px solid #333', background: selectedServiceIds.includes(s.id) ? 'rgba(59,130,246,0.1)' : 'transparent', color: selectedServiceIds.includes(s.id) ? '#60a5fa' : '#a0a0a0' }}>
                     <span>{s.name}</span>
                     <span style={{ fontSize: '0.8rem' }}>{s.duration_minutes} min</span>
